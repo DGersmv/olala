@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { OlalaLogo } from "./olala-logo"
 import { Calendar, Flower2, Truck } from "lucide-react"
 
@@ -37,16 +36,16 @@ const features = [
 ]
 
 const flowerImages = [
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/17-MLr4dwAijgUWrc0LZUPq7nDWgvWgI3.jpg", alt: "Нарциссы и гиацинты" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/19-2kGsgi9KOHDoEDGZWyzmKgwCY34LQV.jpg", alt: "Персиковые розы" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/14-iDgeluPYW4v40aSBX6hnUyM97ZNyq1.jpg", alt: "Желтые розы" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-rIGD5FYw40de15YICXmHIgYku7l4CP.jpg", alt: "Розовые розы в коробке" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/12-dQaqxT6qyW51JnN197ET1ma8KIJMhE.jpg", alt: "Весенний букет" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/18-tqxNHkf128JVDcBRar6UxTkyDoBfRD.jpg", alt: "Протея" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/15-wojMg6Nk6desgot2vKWaTTKfjUzsOc.jpg", alt: "Розовый букет" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/20-gOLCNreUBxXiCf4fPkwfXiQplFQ7ld.jpg", alt: "Авторская композиция" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/16-JhazxoOrmc0qUgC0ad2hPhBhuMgy3V.jpg", alt: "Ранункулюсы" },
-  { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/13-20aeo0NLrjvqzOgPplBhNEyxaBXftG.jpg", alt: "Нежные ранункулюсы" },
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/17-MLr4dwAijgUWrc0LZUPq7nDWgvWgI3.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/19-2kGsgi9KOHDoEDGZWyzmKgwCY34LQV.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/14-iDgeluPYW4v40aSBX6hnUyM97ZNyq1.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-rIGD5FYw40de15YICXmHIgYku7l4CP.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/12-dQaqxT6qyW51JnN197ET1ma8KIJMhE.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/18-tqxNHkf128JVDcBRar6UxTkyDoBfRD.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/15-wojMg6Nk6desgot2vKWaTTKfjUzsOc.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/20-gOLCNreUBxXiCf4fPkwfXiQplFQ7ld.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/16-JhazxoOrmc0qUgC0ad2hPhBhuMgy3V.jpg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/13-20aeo0NLrjvqzOgPplBhNEyxaBXftG.jpg",
 ]
 
 export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenProps) {
@@ -54,50 +53,46 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 py-10">
       {/* Animated background */}
       <div
-        className="absolute inset-0 transition-all duration-2000"
+        className="absolute inset-0 -z-20 transition-all duration-2000"
         style={{ background: heroGradients[heroIdx] }}
       />
 
       {/* Background flower cards - left side */}
-      <div className="pointer-events-none absolute left-0 top-0 hidden h-full w-[200px] flex-col gap-4 p-4 opacity-40 lg:flex xl:w-[280px]">
-        {flowerImages.slice(0, 5).map((img, i) => (
+      <div className="pointer-events-none absolute left-0 top-0 -z-10 hidden h-full w-[200px] flex-col gap-4 overflow-hidden p-4 lg:flex xl:w-[280px]">
+        {flowerImages.slice(0, 5).map((src, i) => (
           <div
             key={i}
-            className="animate-fade-up relative aspect-[3/4] w-full overflow-hidden shadow-lg"
+            className="animate-fade-up relative h-[200px] w-full flex-shrink-0 overflow-hidden opacity-30 shadow-lg"
             style={{ animationDelay: `${0.3 + i * 0.15}s` }}
           >
-            <Image
-              src={img.src}
-              alt={img.alt}
-              fill
-              className="object-cover"
-              sizes="280px"
+            <img
+              src={src}
+              alt=""
+              className="h-full w-full object-cover"
             />
           </div>
         ))}
       </div>
 
       {/* Background flower cards - right side */}
-      <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-[200px] flex-col gap-4 p-4 pt-20 opacity-40 lg:flex xl:w-[280px]">
-        {flowerImages.slice(5, 10).map((img, i) => (
+      <div className="pointer-events-none absolute right-0 top-0 -z-10 hidden h-full w-[200px] flex-col gap-4 overflow-hidden p-4 pt-20 lg:flex xl:w-[280px]">
+        {flowerImages.slice(5, 10).map((src, i) => (
           <div
             key={i}
-            className="animate-fade-up relative aspect-[3/4] w-full overflow-hidden shadow-lg"
+            className="animate-fade-up relative h-[200px] w-full flex-shrink-0 overflow-hidden opacity-30 shadow-lg"
             style={{ animationDelay: `${0.5 + i * 0.15}s` }}
           >
-            <Image
-              src={img.src}
-              alt={img.alt}
-              fill
-              className="object-cover"
-              sizes="280px"
+            <img
+              src={src}
+              alt=""
+              className="h-full w-full object-cover"
             />
           </div>
         ))}
       </div>
 
       {/* Floating petals */}
-      <div className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none absolute inset-0 -z-10">
         {[...Array(6)].map((_, i) => (
           <div
             key={i}
