@@ -69,7 +69,7 @@ export function DashboardScreen({
       {/* Greeting */}
       <div className="mb-8 mt-8">
         <h2 className="font-serif text-[28px] font-light">
-          Привет, {firstName} <span className="inline-block animate-bounce">👋</span>
+          Привет, {firstName}
         </h2>
         <p className="mt-1.5 text-sm opacity-40">
           {dates.length === 0
@@ -187,7 +187,6 @@ export function DashboardScreen({
       {/* Empty state */}
       {dates.length === 0 && (
         <div className="py-20 text-center opacity-50">
-          <div className="mb-4 text-5xl">🌸</div>
           <p className="font-serif text-[22px] font-normal">
             Здесь появятся ваши важные даты
           </p>
