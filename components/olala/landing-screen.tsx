@@ -58,11 +58,11 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
       />
 
       {/* Background flower cards - left side */}
-      <div className="pointer-events-none absolute left-0 top-0 -z-10 hidden h-full w-[200px] flex-col gap-4 overflow-hidden p-4 lg:flex xl:w-[280px]">
+      <div className="pointer-events-none fixed left-0 top-0 -z-20 hidden h-full w-32 flex-col gap-4 overflow-hidden p-2 lg:flex">
         {flowerImages.slice(0, 5).map((src, i) => (
           <div
             key={i}
-            className="animate-fade-up relative h-[200px] w-full flex-shrink-0 overflow-hidden opacity-30 shadow-lg"
+            className="animate-fade-up relative h-32 w-full flex-shrink-0 overflow-hidden rounded opacity-25"
             style={{ animationDelay: `${0.3 + i * 0.15}s` }}
           >
             <img
@@ -75,11 +75,11 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
       </div>
 
       {/* Background flower cards - right side */}
-      <div className="pointer-events-none absolute right-0 top-0 -z-10 hidden h-full w-[200px] flex-col gap-4 overflow-hidden p-4 pt-20 lg:flex xl:w-[280px]">
+      <div className="pointer-events-none fixed right-0 top-0 -z-20 hidden h-full w-32 flex-col gap-4 overflow-hidden p-2 pt-20 lg:flex">
         {flowerImages.slice(5, 10).map((src, i) => (
           <div
             key={i}
-            className="animate-fade-up relative h-[200px] w-full flex-shrink-0 overflow-hidden opacity-30 shadow-lg"
+            className="animate-fade-up relative h-32 w-full flex-shrink-0 overflow-hidden rounded opacity-25"
             style={{ animationDelay: `${0.5 + i * 0.15}s` }}
           >
             <img
