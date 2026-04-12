@@ -1,0 +1,127 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Olala warm cream palette */
+  --background: #faf6f2;
+  --foreground: #3a2e2a;
+  --card: #f5efe9;
+  --card-foreground: #3a2e2a;
+  --popover: #f5efe9;
+  --popover-foreground: #3a2e2a;
+  --primary: #d4836b;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(212, 131, 107, 0.06);
+  --secondary-foreground: #3a2e2a;
+  --muted: rgba(58, 46, 42, 0.05);
+  --muted-foreground: rgba(58, 46, 42, 0.5);
+  --accent: rgba(212, 131, 107, 0.1);
+  --accent-foreground: #3a2e2a;
+  --destructive: #c26b80;
+  --destructive-foreground: #ffffff;
+  --border: rgba(58, 46, 42, 0.1);
+  --input: rgba(58, 46, 42, 0.15);
+  --ring: #d4836b;
+  --radius: 0rem;
+  
+  /* Olala specific colors */
+  --tulip: #d4836b;
+  --tulip-light: #d4a08b;
+  --tulip-dark: #c26b80;
+  --tulip-vip: #9e5a6e;
+}
+
+@theme inline {
+  --font-sans: var(--font-sans), 'Outfit', system-ui, sans-serif;
+  --font-serif: var(--font-serif), 'Cormorant Garamond', Georgia, serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-tulip: var(--tulip);
+  --color-tulip-light: var(--tulip-light);
+  --color-tulip-dark: var(--tulip-dark);
+  --color-tulip-vip: var(--tulip-vip);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-weight: 300;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4c4bc;
+  border-radius: 3px;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatPetal {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.15;
+  }
+  90% {
+    opacity: 0.15;
+  }
+  100% {
+    transform: translateY(-20vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s ease both;
+}
+
+.animate-petal {
+  animation: floatPetal 12s ease-in-out infinite;
+}
