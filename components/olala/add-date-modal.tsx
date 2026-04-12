@@ -218,6 +218,37 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
                 </button>
               ))}
             </div>
+
+            {/* Photo preview for selected budget */}
+            {(() => {
+              const selected = BUDGET_OPTIONS.find((b) => b.id === newDate.budget)
+              if (!selected) return null
+              return (
+                <div className="mt-4">
+                  <p className="mb-2 text-[11px] uppercase tracking-widest opacity-40">
+                    Примеры букетов — {selected.label}
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {selected.photos.map((src, i) => (
+                      <div
+                        key={i}
+                        className="aspect-square overflow-hidden"
+                        style={{ borderTop: `2px solid ${selected.color}` }}
+                      >
+                        <img
+                          src={src}
+                          alt={`Пример букета ${selected.label}`}
+                          className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[11px] opacity-40">
+                    Флорист создаст букет в этом стиле специально для вашего случая
+                  </p>
+                </div>
+              )
+            })()}
           </div>
 
           {/* Note */}
