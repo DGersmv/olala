@@ -58,35 +58,27 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
       />
 
       {/* Background flower cards - left side */}
-      <div className="pointer-events-none fixed left-0 top-0 -z-20 hidden h-full w-32 flex-col gap-4 overflow-hidden p-2 lg:flex">
+      <div className="pointer-events-none absolute left-0 top-0 hidden h-full w-32 flex-col gap-3 overflow-hidden p-2 lg:flex" style={{ zIndex: 1 }}>
         {flowerImages.slice(0, 5).map((src, i) => (
           <div
             key={i}
-            className="animate-fade-up relative h-32 w-full flex-shrink-0 overflow-hidden rounded opacity-25"
+            className="animate-fade-up h-32 w-full flex-shrink-0 overflow-hidden rounded opacity-25"
             style={{ animationDelay: `${0.3 + i * 0.15}s` }}
           >
-            <img
-              src={src}
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            <img src={src} alt="" className="h-full w-full object-cover" />
           </div>
         ))}
       </div>
 
       {/* Background flower cards - right side */}
-      <div className="pointer-events-none fixed right-0 top-0 -z-20 hidden h-full w-32 flex-col gap-4 overflow-hidden p-2 pt-20 lg:flex">
+      <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-32 flex-col gap-3 overflow-hidden p-2 pt-20 lg:flex" style={{ zIndex: 1 }}>
         {flowerImages.slice(5, 10).map((src, i) => (
           <div
             key={i}
-            className="animate-fade-up relative h-32 w-full flex-shrink-0 overflow-hidden rounded opacity-25"
+            className="animate-fade-up h-32 w-full flex-shrink-0 overflow-hidden rounded opacity-25"
             style={{ animationDelay: `${0.5 + i * 0.15}s` }}
           >
-            <img
-              src={src}
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            <img src={src} alt="" className="h-full w-full object-cover" />
           </div>
         ))}
       </div>
