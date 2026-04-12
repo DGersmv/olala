@@ -182,7 +182,7 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
               {/* Social links */}
               <div className="mt-3">
                 <label className="mb-1.5 block text-[10px] uppercase tracking-widest opacity-40">
-                  Instagram / TikTok получателя
+                  Instagram / ВКонтакте получателя
                 </label>
                 <input
                   type="text"

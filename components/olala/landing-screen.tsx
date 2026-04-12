@@ -100,13 +100,11 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
 
       <div className="relative z-10 max-w-[680px] text-center">
         {/* Logo */}
-        <div className="animate-fade-up mb-10 flex flex-col items-center">
-          <div className="flex items-center gap-3">
-            <OlalaLogo width={80} />
-            <span className="font-sans text-[11px] uppercase tracking-[6px] opacity-40">
-              flower shop
-            </span>
-          </div>
+        <div className="animate-fade-up mb-10 flex flex-col items-center gap-2">
+          <OlalaLogo width={100} />
+          <span className="font-sans text-[11px] uppercase tracking-[6px] opacity-40">
+            flower shop
+          </span>
         </div>
 
         <p
