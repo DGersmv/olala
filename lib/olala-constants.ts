@@ -131,6 +131,8 @@ export type OccasionId = typeof OCCASION_OPTIONS[number]["id"]
 export type BudgetId = typeof BUDGET_OPTIONS[number]["id"]
 export type OccasionCategory = typeof OCCASION_OPTIONS[number]["cat"]
 
+export type BudgetMode = "catalog" | "florist_choice" | "manual"
+
 export interface DateEntry {
   id: number
   occasion: OccasionId | ""
@@ -138,8 +140,11 @@ export interface DateEntry {
   date: string
   recipientName: string
   recipientPhone: string
+  recipientSocials: string
   address: string
   budget: BudgetId
+  budgetMode: BudgetMode
+  selectedPhotoUrl: string
   note: string
 }
 
