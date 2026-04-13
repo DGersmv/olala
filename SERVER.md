@@ -68,7 +68,7 @@ sudo ufw status
 
 ### Этап 3–4 — Node, репозиторий, сборка, PM2
 
-Репозиторий: `https://github.com/DGersmv/v0-flower-shop-website` (замените на свой форк/URL при необходимости).
+Репозиторий: **`https://github.com/DGersmv/olala`**
 
 **1) Node.js 22.x и git** (NodeSource, подходит для Next.js 16):
 
@@ -83,7 +83,7 @@ npm -v
 
 ```bash
 mkdir -p ~/olala && cd ~/olala
-git clone https://github.com/DGersmv/v0-flower-shop-website.git .
+git clone https://github.com/DGersmv/olala.git .
 ```
 
 (Если репозиторий приватный — настроить [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys) или `git clone` по SSH с ключом на сервере.)
