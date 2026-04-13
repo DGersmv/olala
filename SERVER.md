@@ -70,6 +70,8 @@ sudo ufw status
 
 Репозиторий: **`https://github.com/DGersmv/olala`**
 
+Каталог сайта: **`/var/www/olala`** — привычное место для веб-проектов. После `chown` пользователю `admin` не нужен `sudo` для `git` и `npm` внутри этой папки. Вариант `~/olala` в домашней директории тоже допустим, если так удобнее.
+
 **1) Node.js 22.x и git** (NodeSource, подходит для Next.js 16):
 
 ```bash
@@ -82,7 +84,9 @@ npm -v
 **2) Каталог приложения и клон:**
 
 ```bash
-mkdir -p ~/olala && cd ~/olala
+sudo mkdir -p /var/www/olala
+sudo chown -R "$USER:$USER" /var/www/olala
+cd /var/www/olala
 git clone https://github.com/DGersmv/olala.git .
 ```
 
@@ -91,7 +95,7 @@ git clone https://github.com/DGersmv/olala.git .
 **3) Сборка:**
 
 ```bash
-cd ~/olala
+cd /var/www/olala
 npm ci
 npm run build
 ```
@@ -100,7 +104,7 @@ npm run build
 
 ```bash
 sudo npm install -g pm2
-cd ~/olala
+cd /var/www/olala
 pm2 start npm --name olala -- start
 pm2 save
 pm2 startup
