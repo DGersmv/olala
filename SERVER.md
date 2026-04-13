@@ -70,7 +70,26 @@ sudo ufw status
 
 Репозиторий: **`https://github.com/DGersmv/olala`**
 
-Каталог сайта: **`/var/www/olala`** — привычное место для веб-проектов. После `chown` пользователю `admin` не нужен `sudo` для `git` и `npm` внутри этой папки. Вариант `~/olala` в домашней директории тоже допустим, если так удобнее.
+### Где лежат сайты на сервере
+
+Общий корень: **`/var/www/`**. У каждого проекта — **своя папка** с коротким именем (как на диске, без привязки к домену в названии):
+
+| Каталог | Назначение (пример) |
+|---------|---------------------|
+| **`/var/www/olala`** | Этот сайт (olala-flowers.ru) |
+| **`/var/www/227info`** | Другой проект, когда появится |
+| **`/var/www/…`** | Остальные сайты так же |
+
+Дальше для каждого сайта: свой `git clone`, свой `npm run build`, отдельный процесс в **PM2** (разные имена, например `olala` и `info227`), отдельный **server** / `server_name` в Nginx и свой SSL в certbot.
+
+Первый раз для каталога:
+
+```bash
+sudo mkdir -p /var/www/olala
+sudo chown -R "$USER:$USER" /var/www/olala
+```
+
+После `chown` пользователю `admin` не нужен `sudo` для `git` и `npm` внутри `/var/www/olala`.
 
 **1) Node.js 22.x и git** (NodeSource, подходит для Next.js 16):
 
@@ -81,11 +100,9 @@ node -v
 npm -v
 ```
 
-**2) Каталог приложения и клон:**
+**2) Каталог приложения и клон** (проект **olala**; каталог `/var/www/olala` уже создан блоком «Первый раз» выше):
 
 ```bash
-sudo mkdir -p /var/www/olala
-sudo chown -R "$USER:$USER" /var/www/olala
 cd /var/www/olala
 git clone https://github.com/DGersmv/olala.git .
 ```
