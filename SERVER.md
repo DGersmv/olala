@@ -100,14 +100,48 @@ node -v
 npm -v
 ```
 
-**2) Каталог приложения и клон** (проект **olala**; каталог `/var/www/olala` уже создан блоком «Первый раз» выше):
+**2) Каталог и клон с GitHub**
+
+Пароль от аккаунта GitHub для `git clone` по **HTTPS** **не подходит** — GitHub требует [Personal Access Token](https://github.com/settings/tokens) вместо пароля или вход по **SSH**. На сервере удобнее **SSH-ключ**.
+
+##### SSH-ключ только для GitHub (на сервере, один раз)
+
+```bash
+ssh-keygen -t ed25519 -C "deploy-olala-vps" -f ~/.ssh/id_ed25519_github -N ""
+cat ~/.ssh/id_ed25519_github.pub
+```
+
+Скопируйте **одну строку** вывода (от `ssh-ed25519` до конца). На GitHub:
+
+- **Вариант А:** [SSH keys в профиле](https://github.com/settings/keys) → **New SSH key** — ключ с этого сервера будет работать для **всех** ваших репозиториев.
+- **Вариант Б:** репозиторий **olala** → **Settings** → **Deploy keys** → **Add deploy key** — ключ только для **этого** репозитория (удобно для продакшена).
+
+Затем конфиг и проверка:
+
+```bash
+printf '%s\n' \
+  'Host github.com' \
+  '  HostName github.com' \
+  '  User git' \
+  '  IdentityFile ~/.ssh/id_ed25519_github' \
+  '  IdentitiesOnly yes' \
+  >> ~/.ssh/config
+chmod 600 ~/.ssh/config
+ssh -T git@github.com
+```
+
+Должно быть сообщение вроде: `Hi DGersmv! You've successfully authenticated...`
+
+Клонирование по **SSH**:
 
 ```bash
 cd /var/www/olala
-git clone https://github.com/DGersmv/olala.git .
+git clone git@github.com:DGersmv/olala.git .
 ```
 
-(Если репозиторий приватный — настроить [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys) или `git clone` по SSH с ключом на сервере.)
+##### Если нужен именно HTTPS
+
+Создайте токен: GitHub → **Settings** → **Developer settings** → **Personal access tokens** → доступ к репо. При `git clone` в качестве пароля вставьте **токен**, не пароль от сайта.
 
 **3) Сборка:**
 
