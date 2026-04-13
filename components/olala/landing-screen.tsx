@@ -35,18 +35,8 @@ const features = [
   },
 ]
 
-const flowerImages = [
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/17-MLr4dwAijgUWrc0LZUPq7nDWgvWgI3.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/19-2kGsgi9KOHDoEDGZWyzmKgwCY34LQV.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/14-iDgeluPYW4v40aSBX6hnUyM97ZNyq1.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-rIGD5FYw40de15YICXmHIgYku7l4CP.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/12-dQaqxT6qyW51JnN197ET1ma8KIJMhE.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/18-tqxNHkf128JVDcBRar6UxTkyDoBfRD.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/15-wojMg6Nk6desgot2vKWaTTKfjUzsOc.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/20-gOLCNreUBxXiCf4fPkwfXiQplFQ7ld.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/16-JhazxoOrmc0qUgC0ad2hPhBhuMgy3V.jpg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/13-20aeo0NLrjvqzOgPplBhNEyxaBXftG.jpg",
-]
+/** Фоновые карточки — статика из `public/landing/` */
+const flowerImages = Array.from({ length: 10 }, (_, i) => `/landing/${String(i + 1).padStart(2, "0")}.jpg`)
 
 export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenProps) {
   return (

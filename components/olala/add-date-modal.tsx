@@ -147,70 +147,6 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
               />
             </div>
 
-            {/* Recipient */}
-            <div className="mt-5 border-t border-border pt-5">
-              <label className="mb-3 block text-[11px] uppercase tracking-widest opacity-50">
-                Данные получателя
-              </label>
-              <div className="flex flex-wrap gap-3">
-                <div className="min-w-[200px] flex-1">
-                  <label className="mb-1.5 block text-[10px] uppercase tracking-widest opacity-40">
-                    Имя
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Имя получателя"
-                    value={newDate.recipientName}
-                    onChange={(e) => set("recipientName", e.target.value)}
-                    className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                  />
-                </div>
-                <div className="min-w-[200px] flex-1">
-                  <label className="mb-1.5 block text-[10px] uppercase tracking-widest opacity-40">
-                    Телефон
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="+371..."
-                    value={newDate.recipientPhone}
-                    onChange={(e) => set("recipientPhone", e.target.value)}
-                    className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Social links */}
-              <div className="mt-3">
-                <label className="mb-1.5 block text-[10px] uppercase tracking-widest opacity-40">
-                  Instagram / ВКонтакте получателя
-                </label>
-                <input
-                  type="text"
-                  placeholder="@username или ссылка — флорист подберёт стиль"
-                  value={newDate.recipientSocials}
-                  onChange={(e) => set("recipientSocials", e.target.value)}
-                  className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                />
-                <p className="mt-1 text-[10px] opacity-35">
-                  Необязательно. Помогает флористу понять эстетику получателя.
-                </p>
-              </div>
-            </div>
-
-            {/* Address */}
-            <div className="mt-4">
-              <label className="mb-1.5 block text-[11px] uppercase tracking-widest opacity-50">
-                Адрес доставки
-              </label>
-              <input
-                type="text"
-                placeholder="ул. Бривибас 100, Рига"
-                value={newDate.address}
-                onChange={(e) => set("address", e.target.value)}
-                className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
-              />
-            </div>
-
             {/* Budget */}
             <div className="mt-5 border-t border-border pt-5">
               <label className="mb-3 block text-[11px] uppercase tracking-widest opacity-50">
@@ -369,6 +305,70 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Recipient */}
+            <div className="mt-5 border-t border-border pt-5">
+              <label className="mb-3 block text-[11px] uppercase tracking-widest opacity-50">
+                Данные получателя
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <div className="min-w-[200px] flex-1">
+                  <label className="mb-1.5 block text-[10px] uppercase tracking-widest opacity-40">
+                    Имя
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Имя получателя"
+                    value={newDate.recipientName}
+                    onChange={(e) => set("recipientName", e.target.value)}
+                    className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  />
+                </div>
+                <div className="min-w-[200px] flex-1">
+                  <label className="mb-1.5 block text-[10px] uppercase tracking-widest opacity-40">
+                    Телефон
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+371..."
+                    value={newDate.recipientPhone}
+                    onChange={(e) => set("recipientPhone", e.target.value)}
+                    className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Social links */}
+              <div className="mt-3">
+                <label className="mb-1.5 block text-[10px] uppercase tracking-widest opacity-40">
+                  Instagram / ВКонтакте получателя
+                </label>
+                <input
+                  type="text"
+                  placeholder="@username или ссылка — флорист подберёт стиль"
+                  value={newDate.recipientSocials}
+                  onChange={(e) => set("recipientSocials", e.target.value)}
+                  className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                />
+                <p className="mt-1 text-[10px] opacity-35">
+                  Необязательно. Помогает флористу понять эстетику получателя.
+                </p>
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="mt-4">
+              <label className="mb-1.5 block text-[11px] uppercase tracking-widest opacity-50">
+                Адрес доставки
+              </label>
+              <input
+                type="text"
+                placeholder="ул. Бривибас 100, Рига"
+                value={newDate.address}
+                onChange={(e) => set("address", e.target.value)}
+                className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+              />
             </div>
 
             {/* Note */}

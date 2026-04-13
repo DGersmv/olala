@@ -76,11 +76,7 @@ export const BUDGET_OPTIONS = [
     price: "25–40€",
     desc: "Элегантный моно-букет",
     color: "#d4a08b",
-    photos: [
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/18-tqxNHkf128JVDcBRar6UxTkyDoBfRD.jpg",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/16-JhazxoOrmc0qUgC0ad2hPhBhuMgy3V.jpg",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/13-20aeo0NLrjvqzOgPplBhNEyxaBXftG.jpg",
-    ],
+    photos: ["/catalog/mini/01.jpg", "/catalog/mini/02.jpg", "/catalog/mini/03.jpg"],
   },
   {
     id: "medium",
@@ -89,9 +85,9 @@ export const BUDGET_OPTIONS = [
     desc: "Сезонная композиция",
     color: "#d4836b",
     photos: [
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/17-MLr4dwAijgUWrc0LZUPq7nDWgvWgI3.jpg",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/12-dQaqxT6qyW51JnN197ET1ma8KIJMhE.jpg",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/15-wojMg6Nk6desgot2vKWaTTKfjUzsOc.jpg",
+      "/catalog/classic/01.jpg",
+      "/catalog/classic/02.jpg",
+      "/catalog/classic/03.jpg",
     ],
   },
   {
@@ -101,9 +97,9 @@ export const BUDGET_OPTIONS = [
     desc: "Роскошный авторский букет",
     color: "#c26b80",
     photos: [
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/19-2kGsgi9KOHDoEDGZWyzmKgwCY34LQV.jpg",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-rIGD5FYw40de15YICXmHIgYku7l4CP.jpg",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/14-iDgeluPYW4v40aSBX6hnUyM97ZNyq1.jpg",
+      "/catalog/premium/01.jpg",
+      "/catalog/premium/02.jpg",
+      "/catalog/premium/03.jpg",
     ],
   },
   {
@@ -112,11 +108,7 @@ export const BUDGET_OPTIONS = [
     price: "от 120€",
     desc: "Эксклюзивная флористика",
     color: "#9e5a6e",
-    photos: [
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/20-gOLCNreUBxXiCf4fPkwfXiQplFQ7ld.jpg",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-rIGD5FYw40de15YICXmHIgYku7l4CP.jpg",
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/19-2kGsgi9KOHDoEDGZWyzmKgwCY34LQV.jpg",
-    ],
+    photos: ["/catalog/vip/01.jpg", "/catalog/vip/02.jpg", "/catalog/vip/03.jpg"],
   },
 ] as const
 
