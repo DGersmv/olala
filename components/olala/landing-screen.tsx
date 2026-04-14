@@ -1,7 +1,6 @@
 "use client"
 
-import { OlalaLogo } from "./olala-logo"
-import { Calendar, Flower2, Truck } from "lucide-react"
+import { OlalaLogoAnimated } from "./olala-logo-animated"
 
 interface LandingScreenProps {
   onRegister: () => void
@@ -17,30 +16,12 @@ const heroGradients = [
   "linear-gradient(135deg, #f0ddd6 0%, #faf6f2 50%, #f5e6e0 100%)",
 ]
 
-const features = [
-  {
-    icon: Calendar,
-    title: "Добавьте даты",
-    desc: "Дни рождения, годовщины, праздники",
-  },
-  {
-    icon: Flower2,
-    title: "Выберите бюджет",
-    desc: "Флорист подберёт идеальный букет",
-  },
-  {
-    icon: Truck,
-    title: "Доставка в срок",
-    desc: "Букет приедет точно в нужный день",
-  },
-]
-
 /** Фоновые карточки — статика из `public/landing/` */
 const flowerImages = Array.from({ length: 10 }, (_, i) => `/landing/${String(i + 1).padStart(2, "0")}.jpg`)
 
 export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenProps) {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 py-10">
+    <div className="relative min-h-screen overflow-hidden">
       {/* Animated background */}
       <div
         className="absolute inset-0 -z-20 transition-all duration-2000"
@@ -88,67 +69,54 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
         ))}
       </div>
 
-      <div className="relative z-10 max-w-[680px] text-center">
-        {/* Logo */}
-        <div className="animate-fade-up mb-10 flex flex-col items-center gap-2">
-          <OlalaLogo width={100} />
-          <span className="font-sans text-[11px] uppercase tracking-[6px] opacity-40">
-            flower shop
-          </span>
-        </div>
+      {/* Верхняя и нижняя трети — пустые; контент в средней трети по вертикали */}
+      <div className="relative z-10 grid min-h-screen w-full grid-rows-[1fr_auto_1fr] px-5">
+        <div aria-hidden className="min-h-0" />
+        <div className="mx-auto flex w-full max-w-[680px] min-h-0 flex-col items-center justify-center py-6 text-center">
+          <div className="animate-fade-up mb-8 flex flex-col items-center gap-2">
+            <OlalaLogoAnimated size={280} className="flex flex-col items-center" />
+            <span className="font-sans text-[11px] uppercase tracking-[6px] opacity-40">
+              flower shop
+            </span>
+          </div>
 
-        <p
-          className="animate-fade-up mb-4 font-serif text-[26px] font-light leading-relaxed"
-          style={{ animationDelay: "0.15s" }}
-        >
-          Забудьте о забытых датах.
-          <br />
-          <span className="italic text-primary">Мы помним за вас.</span>
-        </p>
-
-        <p
-          className="animate-fade-up mx-auto mb-10 max-w-[480px] text-sm leading-relaxed opacity-50"
-          style={{ animationDelay: "0.25s" }}
-        >
-          Зарегистрируйтесь, добавьте важные даты — и в нужный день ваши близкие
-          получат авторский букет от нашего флориста. Без напоминаний, без
-          забот.
-        </p>
-
-        <div
-          className="animate-fade-up flex flex-wrap justify-center gap-4"
-          style={{ animationDelay: "0.35s" }}
-        >
-          <button
-            onClick={onRegister}
-            className="cursor-pointer bg-primary px-10 py-3.5 text-sm font-normal uppercase tracking-widest text-primary-foreground transition-all hover:opacity-90"
+          <p
+            className="animate-fade-up mb-4 font-serif text-[26px] font-light leading-relaxed"
+            style={{ animationDelay: "0.15s" }}
           >
-            Начать
-          </button>
-          <button
-            onClick={onLogin}
-            className="cursor-pointer border border-border bg-transparent px-10 py-3.5 text-sm font-light uppercase tracking-widest text-foreground transition-all hover:bg-accent"
-          >
-            Уже есть аккаунт
-          </button>
-        </div>
+            Забудьте о забытых датах.
+            <br />
+            <span className="italic text-primary">Мы помним за вас.</span>
+          </p>
 
-        {/* Features */}
-        <div className="mt-16 flex flex-wrap justify-center gap-6">
-          {features.map((f, i) => (
-            <div
-              key={i}
-              className="animate-fade-up w-[180px] border border-border bg-secondary p-7 text-center"
-              style={{ animationDelay: `${0.3 + i * 0.15}s` }}
+          <p
+            className="animate-fade-up mx-auto mb-10 max-w-[480px] text-sm leading-relaxed opacity-50"
+            style={{ animationDelay: "0.25s" }}
+          >
+            Зарегистрируйтесь, добавьте важные даты — и в нужный день ваши близкие
+            получат авторский букет от нашего флориста. Без напоминаний, без
+            забот.
+          </p>
+
+          <div
+            className="animate-fade-up flex flex-wrap justify-center gap-4"
+            style={{ animationDelay: "0.35s" }}
+          >
+            <button
+              onClick={onRegister}
+              className="cursor-pointer bg-primary px-10 py-3.5 text-sm font-normal uppercase tracking-widest text-primary-foreground transition-all hover:opacity-90"
             >
-              <f.icon className="mx-auto mb-3 size-7 text-primary" strokeWidth={1.5} />
-              <h3 className="mb-1.5 font-serif text-base font-medium">
-                {f.title}
-              </h3>
-              <p className="text-xs leading-relaxed opacity-40">{f.desc}</p>
-            </div>
-          ))}
+              Начать
+            </button>
+            <button
+              onClick={onLogin}
+              className="cursor-pointer border border-border bg-transparent px-10 py-3.5 text-sm font-light uppercase tracking-widest text-foreground transition-all hover:bg-accent"
+            >
+              Уже есть аккаунт
+            </button>
+          </div>
         </div>
+        <div aria-hidden className="min-h-0" />
       </div>
     </div>
   )
