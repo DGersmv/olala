@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { OlalaLogo } from "./olala-logo"
+import { OlalaLogoAnimated } from "./olala-logo-animated"
 import type { UserData } from "@/lib/olala-constants"
 import { ArrowLeft } from "lucide-react"
 
@@ -121,8 +122,11 @@ export function LoginScreen({ onSubmit, onBack }: LoginScreenProps) {
       </button>
 
       <div className="animate-fade-up w-full max-w-[420px] border border-border bg-secondary px-10 py-12">
-        <div className="mb-5">
-          <OlalaLogo width={120} />
+        <div className="mb-5 flex flex-col items-center gap-2">
+          <OlalaLogoAnimated size={120} className="flex flex-col items-center" />
+          <span className="font-sans text-[11px] uppercase tracking-[6px] opacity-40">
+            flower shop
+          </span>
         </div>
         <h2 className="mb-2 font-serif text-[32px] font-light">Вход</h2>
         <p className="mb-8 text-[13px] opacity-40">С возвращением</p>

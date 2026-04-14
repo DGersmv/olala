@@ -28,26 +28,29 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
         style={{ background: heroGradients[heroIdx] }}
       />
 
-      {/* Background flower cards - left side */}
-      <div className="pointer-events-none absolute left-0 top-0 hidden h-full w-32 flex-col gap-3 overflow-hidden p-2 lg:flex" style={{ zIndex: 1 }}>
+      {/* Background flower cards — из центра разлетаются влево/вправо (как логотип: старт ~300ms) */}
+      <div className="pointer-events-none absolute left-0 top-0 z-[1] hidden h-full w-32 flex-col gap-3 p-2 lg:flex">
         {flowerImages.slice(0, 5).map((src, i) => (
           <div
             key={i}
-            className="animate-fade-up h-32 w-full flex-shrink-0 overflow-hidden rounded opacity-25"
-            style={{ animationDelay: `${0.3 + i * 0.15}s` }}
+            className="animate-flower-left h-32 w-full flex-shrink-0 overflow-hidden rounded"
+            style={{
+              animationDelay: `${300 + i * 100}ms`,
+            }}
           >
             <img src={src} alt="" className="h-full w-full object-cover" />
           </div>
         ))}
       </div>
 
-      {/* Background flower cards - right side */}
-      <div className="pointer-events-none absolute right-0 top-0 hidden h-full w-32 flex-col gap-3 overflow-hidden p-2 pt-20 lg:flex" style={{ zIndex: 1 }}>
+      <div className="pointer-events-none absolute right-0 top-0 z-[1] hidden h-full w-32 flex-col gap-3 p-2 pt-20 lg:flex">
         {flowerImages.slice(5, 10).map((src, i) => (
           <div
             key={i}
-            className="animate-fade-up h-32 w-full flex-shrink-0 overflow-hidden rounded opacity-25"
-            style={{ animationDelay: `${0.5 + i * 0.15}s` }}
+            className="animate-flower-right h-32 w-full flex-shrink-0 overflow-hidden rounded"
+            style={{
+              animationDelay: `${300 + i * 100}ms`,
+            }}
           >
             <img src={src} alt="" className="h-full w-full object-cover" />
           </div>
@@ -69,7 +72,6 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
         ))}
       </div>
 
-      {/* Верхняя и нижняя трети — пустые; контент в средней трети по вертикали */}
       <div className="relative z-10 grid min-h-screen w-full grid-rows-[1fr_auto_1fr] px-5">
         <div aria-hidden className="min-h-0" />
         <div className="mx-auto flex w-full max-w-[680px] min-h-0 flex-col items-center justify-center py-6 text-center">

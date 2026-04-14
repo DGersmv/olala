@@ -125,3 +125,58 @@
 .animate-petal {
   animation: floatPetal 12s ease-in-out infinite;
 }
+
+/* Боковые фото: разлёт из центра → на месте «в тумане» → плавное прояснение */
+@keyframes flowerSpreadLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(calc(50vw - 50%));
+    filter: blur(14px);
+  }
+  62% {
+    opacity: 0.25;
+    transform: translateX(0);
+    filter: blur(7px);
+  }
+  100% {
+    opacity: 0.32;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes flowerSpreadRight {
+  0% {
+    opacity: 0;
+    transform: translateX(calc(-50vw + 50%));
+    filter: blur(14px);
+  }
+  62% {
+    opacity: 0.25;
+    transform: translateX(0);
+    filter: blur(7px);
+  }
+  100% {
+    opacity: 0.32;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+.animate-flower-left {
+  animation: flowerSpreadLeft 3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-flower-right {
+  animation: flowerSpreadRight 3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flower-left,
+  .animate-flower-right {
+    animation: none;
+    opacity: 0.32;
+    filter: none;
+    transform: none;
+  }
+}
