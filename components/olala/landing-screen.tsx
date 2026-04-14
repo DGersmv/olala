@@ -1,5 +1,6 @@
 "use client"
 
+import type { CSSProperties } from "react"
 import { OlalaLogoAnimated } from "./olala-logo-animated"
 
 interface LandingScreenProps {
@@ -28,33 +29,29 @@ export function LandingScreen({ onRegister, onLogin, heroIdx }: LandingScreenPro
         style={{ background: heroGradients[heroIdx] }}
       />
 
-      {/* Background flower cards — из центра разлетаются влево/вправо (как логотип: старт ~300ms) */}
-      <div className="pointer-events-none absolute left-0 top-0 z-[1] hidden h-full w-32 flex-col gap-3 p-2 lg:flex">
-        {flowerImages.slice(0, 5).map((src, i) => (
-          <div
-            key={i}
-            className="animate-flower-left h-32 w-full flex-shrink-0 overflow-hidden rounded"
-            style={{
-              animationDelay: `${300 + i * 100}ms`,
-            }}
-          >
-            <img src={src} alt="" className="h-full w-full object-cover" />
-          </div>
-        ))}
-      </div>
-
-      <div className="pointer-events-none absolute right-0 top-0 z-[1] hidden h-full w-32 flex-col gap-3 p-2 pt-20 lg:flex">
-        {flowerImages.slice(5, 10).map((src, i) => (
-          <div
-            key={i}
-            className="animate-flower-right h-32 w-full flex-shrink-0 overflow-hidden rounded"
-            style={{
-              animationDelay: `${300 + i * 100}ms`,
-            }}
-          >
-            <img src={src} alt="" className="h-full w-full object-cover" />
-          </div>
-        ))}
+      {/* Background flower cards — все из центра экрана, лучами как распускающийся цветок */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] hidden lg:block"
+        aria-hidden
+      >
+        {flowerImages.map((src, i) => {
+          const step = 360 / flowerImages.length
+          const angleDeg = -90 + i * step
+          return (
+            <div
+              key={src}
+              className="animate-flower-bloom absolute left-1/2 top-1/2 h-32 w-32 overflow-hidden rounded shadow-sm"
+              style={{
+                "--petal-angle": `${angleDeg}deg`,
+                "--petal-radius": "min(42vw, 46vh)",
+                animationDelay: `${300 + i * 90}ms`,
+                zIndex: i,
+              } as CSSProperties}
+            >
+              <img src={src} alt="" className="h-full w-full object-cover" />
+            </div>
+          )
+        })}
       </div>
 
       {/* Floating petals */}

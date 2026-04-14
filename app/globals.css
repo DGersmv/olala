@@ -71,9 +71,28 @@
     @apply border-border outline-ring/50;
     box-sizing: border-box;
   }
+  /* Курсор — контур тюльпана из логотипа; hotspot у нижней части цветка */
+  html {
+    cursor: url("/tulip-cursor.svg") 16 26, auto;
+  }
   body {
     @apply bg-background text-foreground;
     font-weight: 300;
+    cursor: inherit;
+  }
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+  }
+  /* Tailwind cursor-pointer и интерактив — тот же тюльпан */
+  button,
+  a[href],
+  [role="button"],
+  label[for],
+  summary,
+  .cursor-pointer {
+    cursor: url("/tulip-cursor.svg") 16 26, pointer !important;
   }
 }
 
@@ -126,57 +145,40 @@
   animation: floatPetal 12s ease-in-out infinite;
 }
 
-/* Боковые фото: разлёт из центра → на месте «в тумане» → плавное прояснение */
-@keyframes flowerSpreadLeft {
+/* Фото с hero: распускание из центра — лучи как лепестки тюльпана */
+@keyframes flowerBloom {
   0% {
     opacity: 0;
-    transform: translateX(calc(50vw - 50%));
+    transform: translate(-50%, -50%) rotate(var(--petal-angle, 0deg))
+      translateY(0) scale(0.55);
     filter: blur(14px);
   }
-  62% {
-    opacity: 0.25;
-    transform: translateX(0);
-    filter: blur(7px);
+  48% {
+    opacity: 0.22;
+    filter: blur(8px);
+  }
+  72% {
+    opacity: 0.28;
+    filter: blur(3px);
   }
   100% {
     opacity: 0.32;
-    transform: translateX(0);
+    transform: translate(-50%, -50%) rotate(var(--petal-angle, 0deg))
+      translateY(calc(-1 * var(--petal-radius, 280px))) scale(1);
     filter: blur(0);
   }
 }
 
-@keyframes flowerSpreadRight {
-  0% {
-    opacity: 0;
-    transform: translateX(calc(-50vw + 50%));
-    filter: blur(14px);
-  }
-  62% {
-    opacity: 0.25;
-    transform: translateX(0);
-    filter: blur(7px);
-  }
-  100% {
-    opacity: 0.32;
-    transform: translateX(0);
-    filter: blur(0);
-  }
-}
-
-.animate-flower-left {
-  animation: flowerSpreadLeft 3s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.animate-flower-right {
-  animation: flowerSpreadRight 3s cubic-bezier(0.22, 1, 0.36, 1) both;
+.animate-flower-bloom {
+  animation: flowerBloom 3.2s cubic-bezier(0.2, 0.85, 0.25, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-flower-left,
-  .animate-flower-right {
+  .animate-flower-bloom {
     animation: none;
     opacity: 0.32;
     filter: none;
-    transform: none;
+    transform: translate(-50%, -50%) rotate(var(--petal-angle, 0deg))
+      translateY(calc(-1 * var(--petal-radius, 280px))) scale(1);
   }
 }
