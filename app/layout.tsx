@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Outfit } from 'next/font/google'
+import { Cormorant_Garamond, Raleway } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
@@ -10,8 +10,8 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
 })
 
-const outfit = Outfit({
-  subsets: ["latin"],
+const raleway = Raleway({
+  subsets: ["latin", "cyrillic"],
   weight: ["200", "300", "400", "500"],
   variable: "--font-sans",
 })
@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ru" className={`${cormorant.variable} ${outfit.variable}`}>
+    <html lang="ru" className={`${cormorant.variable} ${raleway.variable}`}>
       <body className="font-sans antialiased bg-background text-foreground">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}

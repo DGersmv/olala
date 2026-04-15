@@ -1,7 +1,25 @@
 "use client"
 
 import { useState } from "react"
-import { X, BookOpen, Sparkles } from "lucide-react"
+import {
+  X, BookOpen, Sparkles,
+  Heart, User, Users, Star, Briefcase, Home,
+  Gem, Wine, Scroll, GraduationCap,
+  Flower2, HeartPulse, BarChart2, Scale, ChefHat,
+  Newspaper, Compass, Code2, Handshake, Pill,
+  Palette, ClipboardList, Building2, Award,
+  Sun, Flame, Bell, Pencil,
+  type LucideIcon,
+} from "lucide-react"
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Heart, User, Users, Star, Briefcase, Home,
+  Gem, Wine, Scroll, GraduationCap, BookOpen,
+  Flower2, HeartPulse, BarChart2, Scale, ChefHat,
+  Newspaper, Compass, Code2, Handshake, Pill,
+  Palette, ClipboardList, Building2, Award, Sparkles,
+  Sun, Flame, Bell, Pencil,
+}
 import {
   OCCASION_OPTIONS,
   OCCASION_SECTIONS,
@@ -12,15 +30,17 @@ import {
   type BudgetMode,
 } from "@/lib/olala-constants"
 import { CatalogModal } from "./catalog-modal"
+import type { CatalogPhotos } from "@/lib/catalog-photos"
 
 interface AddDateModalProps {
   onClose: () => void
   onAdd: (date: Omit<DateEntry, "id">) => void
+  catalogPhotos: CatalogPhotos
 }
 
 type NewDateForm = Omit<DateEntry, "id">
 
-export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
+export function AddDateModal({ onClose, onAdd, catalogPhotos }: AddDateModalProps) {
   const [showCatalog, setShowCatalog] = useState(false)
 
   const [newDate, setNewDate] = useState<NewDateForm>({
@@ -32,7 +52,7 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
     recipientSocials: "",
     address: "",
     budget: "medium",
-    budgetMode: "manual",
+    budgetMode: "florist_choice",
     selectedPhotoUrl: "",
     note: "",
   })
@@ -98,7 +118,7 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
                           : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <span>{o.icon}</span>
+                      {(() => { const Ic = ICON_MAP[o.icon]; return Ic ? <Ic className="size-3.5 flex-shrink-0 opacity-50" /> : null })()}
                       <span>{o.label}</span>
                     </button>
                   ))}
@@ -154,12 +174,11 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
               </label>
 
               {/* Budget mode switcher */}
-              <div className="mb-4 grid grid-cols-3 gap-2">
+              <div className="mb-4 grid grid-cols-2 gap-2">
                 {(
                   [
-                    { mode: "manual" as BudgetMode, label: "Указать бюджет", icon: null },
                     { mode: "catalog" as BudgetMode, label: "Из каталога", icon: BookOpen },
-                    { mode: "florist_choice" as BudgetMode, label: "Выбор магазина", icon: Sparkles },
+                    { mode: "florist_choice" as BudgetMode, label: "На выбор флориста", icon: Sparkles },
                   ] as const
                 ).map(({ mode, label, icon: Icon }) => (
                   <button
@@ -171,65 +190,11 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
                         : "border-border bg-secondary/50 opacity-60 hover:opacity-100"
                     }`}
                   >
-                    {Icon && <Icon className="size-3.5" />}
+                    <Icon className="size-3.5" />
                     <span>{label}</span>
                   </button>
                 ))}
               </div>
-
-              {/* Manual budget selection */}
-              {newDate.budgetMode === "manual" && (
-                <>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {BUDGET_OPTIONS.map((b) => (
-                      <button
-                        key={b.id}
-                        onClick={() => set("budget", b.id as BudgetId)}
-                        className={`cursor-pointer border bg-secondary/50 p-4 text-center font-sans transition-all ${
-                          newDate.budget === b.id
-                            ? "border-primary bg-accent"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                        style={
-                          newDate.budget === b.id
-                            ? { borderColor: b.color, boxShadow: `0 0 20px ${b.color}33` }
-                            : {}
-                        }
-                      >
-                        <span className="block text-base font-normal" style={{ color: b.color }}>
-                          {b.price}
-                        </span>
-                        <span className="block text-[13px] font-normal">{b.label}</span>
-                        <span className="block text-[11px] opacity-40">{b.desc}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Inline photo preview */}
-                  {selectedBudget && (
-                    <div className="mt-4">
-                      <p className="mb-2 text-[11px] uppercase tracking-widest opacity-40">
-                        Примеры — {selectedBudget.label}
-                      </p>
-                      <div className="grid grid-cols-3 gap-2">
-                        {selectedBudget.photos.map((src, i) => (
-                          <div
-                            key={i}
-                            className="aspect-square overflow-hidden"
-                            style={{ borderTop: `2px solid ${selectedBudget.color}` }}
-                          >
-                            <img
-                              src={src}
-                              alt={`Пример ${selectedBudget.label}`}
-                              className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
 
               {/* Catalog selection */}
               {newDate.budgetMode === "catalog" && (
@@ -303,6 +268,29 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
                       </button>
                     ))}
                   </div>
+
+                  {selectedBudget && catalogPhotos[newDate.budget]?.length > 0 && (
+                    <div className="mt-4">
+                      <p className="mb-2 text-[11px] uppercase tracking-widest opacity-40">
+                        Примеры — {selectedBudget.label}
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {catalogPhotos[newDate.budget].map((src, i) => (
+                          <div
+                            key={i}
+                            className="aspect-square overflow-hidden"
+                            style={{ borderTop: `2px solid ${selectedBudget.color}` }}
+                          >
+                            <img
+                              src={src}
+                              alt={`Пример ${selectedBudget.label}`}
+                              className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -331,7 +319,7 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
                   </label>
                   <input
                     type="tel"
-                    placeholder="+371..."
+                    placeholder="+7..."
                     value={newDate.recipientPhone}
                     onChange={(e) => set("recipientPhone", e.target.value)}
                     className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
@@ -364,7 +352,7 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
               </label>
               <input
                 type="text"
-                placeholder="ул. Бривибас 100, Рига"
+                placeholder="пр. Суворова 13, Выборг"
                 value={newDate.address}
                 onChange={(e) => set("address", e.target.value)}
                 className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
@@ -404,6 +392,7 @@ export function AddDateModal({ onClose, onAdd }: AddDateModalProps) {
           }}
           currentBudget={newDate.budget}
           currentPhoto={newDate.selectedPhotoUrl}
+          catalogPhotos={catalogPhotos}
         />
       )}
     </>

@@ -63,7 +63,7 @@ export function RegisterScreen({ onSubmit, onBack }: RegisterScreenProps) {
           </label>
           <input
             type="tel"
-            placeholder="+371 20 000 000"
+            placeholder="+7 900 000 00 00"
             value={form.phone}
             onChange={(e) => set("phone", e.target.value)}
             className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
@@ -137,7 +137,7 @@ export function LoginScreen({ onSubmit, onBack }: LoginScreenProps) {
           </label>
           <input
             type="tel"
-            placeholder="+371 20 000 000"
+            placeholder="+7 900 000 00 00"
             value={form.phone}
             onChange={(e) => set("phone", e.target.value)}
             className="w-full border border-input bg-muted p-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"

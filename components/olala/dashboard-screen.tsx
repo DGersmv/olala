@@ -16,6 +16,7 @@ import {
   getDatesLabel,
 } from "@/lib/olala-utils"
 import { Plus, X, Calendar, MapPin, Flower2, MessageCircle, LogOut } from "lucide-react"
+import type { CatalogPhotos } from "@/lib/catalog-photos"
 
 interface DashboardScreenProps {
   user: UserData | null
@@ -23,6 +24,7 @@ interface DashboardScreenProps {
   onAdd: (date: Omit<DateEntry, "id">) => void
   onRemove: (id: number) => void
   onLogout: () => void
+  catalogPhotos: CatalogPhotos
 }
 
 export function DashboardScreen({
@@ -31,6 +33,7 @@ export function DashboardScreen({
   onAdd,
   onRemove,
   onLogout,
+  catalogPhotos,
 }: DashboardScreenProps) {
   const [showModal, setShowModal] = useState(false)
 
@@ -181,6 +184,7 @@ export function DashboardScreen({
         <AddDateModal
           onClose={() => setShowModal(false)}
           onAdd={onAdd}
+          catalogPhotos={catalogPhotos}
         />
       )}
 

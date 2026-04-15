@@ -34,7 +34,7 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans), 'Outfit', system-ui, sans-serif;
+  --font-sans: var(--font-sans), 'Raleway', system-ui, sans-serif;
   --font-serif: var(--font-serif), 'Cormorant Garamond', Georgia, serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
   --color-background: var(--background);

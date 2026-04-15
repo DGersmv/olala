@@ -5,10 +5,11 @@ import { LandingScreen } from "./landing-screen"
 import { RegisterScreen, LoginScreen } from "./auth-screens"
 import { DashboardScreen } from "./dashboard-screen"
 import type { DateEntry, UserData } from "@/lib/olala-constants"
+import type { CatalogPhotos } from "@/lib/catalog-photos"
 
 type Screen = "landing" | "register" | "login" | "dashboard"
 
-export function OlalaApp() {
+export function OlalaApp({ catalogPhotos }: { catalogPhotos: CatalogPhotos }) {
   const [screen, setScreen] = useState<Screen>("landing")
   const [user, setUser] = useState<UserData | null>(null)
   const [dates, setDates] = useState<DateEntry[]>([])
@@ -91,6 +92,7 @@ export function OlalaApp() {
             onAdd={addDate}
             onRemove={removeDate}
             onLogout={handleLogout}
+            catalogPhotos={catalogPhotos}
           />
         )}
       </div>

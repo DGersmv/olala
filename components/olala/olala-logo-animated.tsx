@@ -27,6 +27,12 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
     return runAnimation()
   }, [runAnimation])
 
+  // Timing from phase 2 trigger (t=1300ms from start):
+  //   bud emerge: 0.9s → done at t=2200ms
+  //   phase 3 at t=2200ms, last letter (0.2s delay + 0.65s) → done at t=3050ms
+  //   sway delay from phase 2 = 3050 - 1300 + 300 buffer = 2050ms ≈ 2.1s
+  const swayDelay = "2.1s"
+
   return (
     <div
       className={className}
@@ -53,6 +59,13 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
           0% { opacity: 0; transform: translateY(24px); }
           100% { opacity: 1; transform: translateY(0); }
         }
+        @keyframes olalaTulipSway {
+          0%        { transform: rotate(0deg); }
+          14%       { transform: rotate(4deg); }
+          35%       { transform: rotate(-3deg); }
+          50%       { transform: rotate(1deg); }
+          60%, 100% { transform: rotate(0deg); }
+        }
       `}</style>
 
       <svg
@@ -61,6 +74,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
         height={size}
         className="cursor-pointer overflow-visible"
       >
+        {/* First L — tall stem, grows up at phase 1 */}
         <g
           style={{
             animation:
@@ -76,32 +90,61 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
           />
         </g>
 
+        {/* Second L — short bar, grows simultaneously with first L */}
         <g
           style={{
-            transformOrigin: "82px 28px",
-            opacity: 0,
-            transform: "scale(0) translateY(6px)",
             animation:
-              phase >= 2
-                ? "olalaBudEmerge 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
+              phase >= 1
+                ? "olalaStemGrow 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards"
                 : "none",
+            clipPath: phase >= 1 ? undefined : "inset(100% 0 0 0)",
           }}
         >
           <path
-            d="m93.96 10.47c-1.25-1.31-5.07 2.06-7.08 4.01l-0.44 0.43c-1.42-3.63-4.04-7.91-5.72-8.21-2.03-0.37-5.29 5.23-6.21 7.93-2.18-2.39-6.21-5.43-7.79-4.95-1.59 0.51-1.93 12.08-0.14 18.94 2.16 8.52 8.13 11.76 14.23 11.76 7.5 0 12.9-6.43 13.85-18.62 0.54-6.89 0.14-10.27-0.7-11.29z"
-            fill="#D11D36"
-          />
-          <path
-            d="m68.77 20.51c1.49 4.67 4.04 11.47 9.81 15.23-0.61 0.27-3.54 0.44-6.11-2.8-3.37-4.22-3.7-10.78-3.7-12.43z"
-            fill="#FEFFFE"
-            style={{
-              opacity: 0,
-              animation:
-                phase >= 2 ? "olalaHighlightFade 0.4s 0.6s ease-out forwards" : "none",
-            }}
+            d="m156.2 207.5c-6.92 0-8.44-5.54-8.44-9.87v-53.94c0-1.92-1.12-2.8-3.21-2.8s-3.51 0.61-3.51 2.8v54.07c0 9.63 5.57 15.43 13.81 15.43h0.94c1.96 0 2.9-1.12 2.9-3.27 0-1.95-0.84-2.42-2.49-2.42z"
+            fill="#1a1a1a"
           />
         </g>
 
+        {/* Tulip — outer wrapper handles gentle sway after logo is complete */}
+        <g
+          style={{
+            transformOrigin: "82px 45px",
+            animation:
+              phase >= 2
+                ? `olalaTulipSway 3s ease-in-out ${swayDelay} infinite`
+                : "none",
+          }}
+        >
+          {/* Inner wrapper handles the emerge animation */}
+          <g
+            style={{
+              transformOrigin: "82px 22px",
+              opacity: 0,
+              transform: "scale(0) translateY(6px)",
+              animation:
+                phase >= 2
+                  ? "olalaBudEmerge 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
+                  : "none",
+            }}
+          >
+            <path
+              d="m93.96 10.47c-1.25-1.31-5.07 2.06-7.08 4.01l-0.44 0.43c-1.42-3.63-4.04-7.91-5.72-8.21-2.03-0.37-5.29 5.23-6.21 7.93-2.18-2.39-6.21-5.43-7.79-4.95-1.59 0.51-1.93 12.08-0.14 18.94 2.16 8.52 8.13 11.76 14.23 11.76 7.5 0 12.9-6.43 13.85-18.62 0.54-6.89 0.14-10.27-0.7-11.29z"
+              fill="#D11D36"
+            />
+            <path
+              d="m68.77 20.51c1.49 4.67 4.04 11.47 9.81 15.23-0.61 0.27-3.54 0.44-6.11-2.8-3.37-4.22-3.7-10.78-3.7-12.43z"
+              fill="#FEFFFE"
+              style={{
+                opacity: 0,
+                animation:
+                  phase >= 2 ? "olalaHighlightFade 0.4s 0.6s ease-out forwards" : "none",
+              }}
+            />
+          </g>
+        </g>
+
+        {/* O — appears after tulip */}
         <g
           style={{
             opacity: 0,
@@ -117,6 +160,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
           />
         </g>
 
+        {/* First A — appears after tulip */}
         <g
           style={{
             opacity: 0,
@@ -132,27 +176,13 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
           />
         </g>
 
+        {/* Second A — appears after tulip */}
         <g
           style={{
             opacity: 0,
             animation:
               phase >= 3
                 ? "olalaLetterUp 0.65s 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards"
-                : "none",
-          }}
-        >
-          <path
-            d="m156.2 207.5c-6.92 0-8.44-5.54-8.44-9.87v-53.94c0-1.92-1.12-2.8-3.21-2.8s-3.51 0.61-3.51 2.8v54.07c0 9.63 5.57 15.43 13.81 15.43h0.94c1.96 0 2.9-1.12 2.9-3.27 0-1.95-0.84-2.42-2.49-2.42z"
-            fill="#1a1a1a"
-          />
-        </g>
-
-        <g
-          style={{
-            opacity: 0,
-            animation:
-              phase >= 3
-                ? "olalaLetterUp 0.65s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
         >
