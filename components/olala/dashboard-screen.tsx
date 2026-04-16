@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { OlalaLogoAnimated } from "./olala-logo-animated"
+import { OlalaLogo } from "./olala-logo"
 import { AddDateModal } from "./add-date-modal"
 import {
   OCCASION_OPTIONS,
@@ -56,7 +56,7 @@ export function DashboardScreen({
     <div className="animate-fade-up mx-auto min-h-screen max-w-[720px] px-6 pb-32">
       {/* Header */}
       <header className="flex items-end justify-between border-b border-border py-4">
-        <OlalaLogoAnimated size={52} />
+        <OlalaLogo width={90} />
         <div className="flex items-center gap-4">
           <span className="text-[13px] opacity-50">{user?.name}</span>
           <button
