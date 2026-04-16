@@ -23,8 +23,14 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
     }
   }, [])
 
+  // Запуск при монтировании + повтор каждые 10 секунд
   useEffect(() => {
-    return runAnimation()
+    const cleanup = runAnimation()
+    const interval = setInterval(() => { runAnimation() }, 10000)
+    return () => {
+      cleanup?.()
+      clearInterval(interval)
+    }
   }, [runAnimation])
 
   // Timing from phase 2 trigger (t=1300ms from start):

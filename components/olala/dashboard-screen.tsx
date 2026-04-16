@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { OlalaLogo } from "./olala-logo"
+import { OlalaLogoAnimated } from "./olala-logo-animated"
 import { AddDateModal } from "./add-date-modal"
 import {
   OCCASION_OPTIONS,
   BUDGET_OPTIONS,
   type DateEntry,
-  type UserData,
 } from "@/lib/olala-constants"
+import type { AuthUser } from "./auth-screens"
 import {
   formatDate,
   daysUntil,
@@ -19,7 +19,7 @@ import { Plus, X, Calendar, MapPin, Flower2, MessageCircle, LogOut } from "lucid
 import type { CatalogPhotos } from "@/lib/catalog-photos"
 
 interface DashboardScreenProps {
-  user: UserData | null
+  user: AuthUser | null
   dates: DateEntry[]
   onAdd: (date: Omit<DateEntry, "id">) => void
   onRemove: (id: number) => void
@@ -55,8 +55,8 @@ export function DashboardScreen({
   return (
     <div className="animate-fade-up mx-auto min-h-screen max-w-[720px] px-6 pb-32">
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-border py-5">
-        <OlalaLogo width={100} />
+      <header className="flex items-end justify-between border-b border-border py-4">
+        <OlalaLogoAnimated size={52} />
         <div className="flex items-center gap-4">
           <span className="text-[13px] opacity-50">{user?.name}</span>
           <button
