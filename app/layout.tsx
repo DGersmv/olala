@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Raleway } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { TulipCursor } from '@/components/olala/tulip-cursor'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -54,6 +55,7 @@ export default function RootLayout({
     <html lang="ru" className={`${cormorant.variable} ${raleway.variable}`}>
       <body className="font-sans antialiased bg-background text-foreground">
         {children}
+        <TulipCursor />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

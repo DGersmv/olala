@@ -23,14 +23,9 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
     }
   }, [])
 
-  // Запуск при монтировании + повтор каждые 10 секунд
+  // Запуск один раз при монтировании
   useEffect(() => {
-    const cleanup = runAnimation()
-    const interval = setInterval(() => { runAnimation() }, 10000)
-    return () => {
-      cleanup?.()
-      clearInterval(interval)
-    }
+    return runAnimation()
   }, [runAnimation])
 
   // Timing from phase 2 trigger (t=1300ms from start):
@@ -156,7 +151,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
             opacity: 0,
             animation:
               phase >= 3
-                ? "olalaLetterUp 0.65s 0s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                ? "olalaLetterUp 1.1s 0s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
         >
@@ -172,7 +167,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
             opacity: 0,
             animation:
               phase >= 3
-                ? "olalaLetterUp 0.65s 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                ? "olalaLetterUp 1.1s 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
         >
@@ -188,7 +183,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
             opacity: 0,
             animation:
               phase >= 3
-                ? "olalaLetterUp 0.65s 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                ? "olalaLetterUp 1.1s 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
         >

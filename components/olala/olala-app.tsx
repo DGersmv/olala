@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { LandingScreen } from "./landing-screen"
-import { RegisterScreen, LoginScreen, AdminLoginScreen } from "./auth-screens"
+import { RegisterScreen, LoginScreen } from "./auth-screens"
 import type { AuthUser } from "./auth-screens"
 import { DashboardScreen } from "./dashboard-screen"
 import { AdminDashboard } from "./admin-dashboard"
 import type { DateEntry } from "@/lib/olala-constants"
 import type { CatalogPhotos } from "@/lib/catalog-photos"
 
-type Screen = "loading" | "landing" | "register" | "login" | "admin_login" | "dashboard" | "admin_dashboard"
+type Screen = "loading" | "landing" | "register" | "login" | "dashboard" | "admin_dashboard"
 
 export function OlalaApp({ catalogPhotos }: { catalogPhotos: CatalogPhotos }) {
   const [screen, setScreen] = useState<Screen>("loading")
@@ -110,10 +110,7 @@ export function OlalaApp({ catalogPhotos }: { catalogPhotos: CatalogPhotos }) {
           <RegisterScreen onSuccess={handleAuth} onBack={() => navigate("landing")} />
         )}
         {screen === "login" && (
-          <LoginScreen onSuccess={handleAuth} onBack={() => navigate("landing")} onSwitchToAdmin={() => navigate("admin_login")} />
-        )}
-        {screen === "admin_login" && (
-          <AdminLoginScreen onSuccess={handleAuth} onBack={() => navigate("login")} />
+          <LoginScreen onSuccess={handleAuth} onBack={() => navigate("landing")} />
         )}
         {screen === "dashboard" && (
           <DashboardScreen

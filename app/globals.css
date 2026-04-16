@@ -71,28 +71,14 @@
     @apply border-border outline-ring/50;
     box-sizing: border-box;
   }
-  /* Курсор — контур тюльпана из логотипа; hotspot у нижней части цветка */
-  html {
-    cursor: url("/tulip-cursor.svg") 16 26, auto;
-  }
   body {
     @apply bg-background text-foreground;
     font-weight: 300;
-    cursor: inherit;
   }
-  input:not([type="checkbox"]):not([type="radio"]),
-  textarea,
-  [contenteditable="true"] {
-    cursor: text;
-  }
-  /* Tailwind cursor-pointer и интерактив — тот же тюльпан */
-  button,
-  a[href],
-  [role="button"],
-  label[for],
-  summary,
-  .cursor-pointer {
-    cursor: url("/tulip-cursor.svg") 16 26, pointer !important;
+  /* Скрываем системный курсор — используем TulipCursor */
+  .has-custom-cursor,
+  .has-custom-cursor * {
+    cursor: none !important;
   }
 }
 

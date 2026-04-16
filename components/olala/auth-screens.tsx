@@ -434,18 +434,6 @@ export function AuthScreen({ mode, onSuccess, onBack, onSwitchToAdmin }: AuthScr
         {step === "form" ? (
           <>
             <FormStep mode={mode} onCodeSent={handleCodeSent} />
-
-            {/* Ссылка на admin только из login */}
-            {mode === "login" && onSwitchToAdmin && (
-              <p className="mt-6 text-center text-[11px] opacity-30">
-                <button
-                  onClick={onSwitchToAdmin}
-                  className="cursor-pointer underline underline-offset-4 hover:opacity-70"
-                >
-                  Вход для администратора
-                </button>
-              </p>
-            )}
           </>
         ) : (
           <CodeStep
