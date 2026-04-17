@@ -21,102 +21,7 @@ export interface AuthScreenProps {
 }
 
 // ─── Yandex SmartCaptcha ─────────────────────────────────────────────────────
-
-// Ключ клиента из Яндекс Облако → SmartCaptcha → "Ключ клиента"
-const CAPTCHA_SITE_KEY = "ysc1_IeP5HbjpcjdaAHjOXYsmwE4itaxmQ1XIP85v7o2n3088fba7"
-
-declare global {
-  interface Window {
-    smartCaptcha?: {
-      render: (el: HTMLElement, params: object) => number
-      destroy: (id: number) => void
-      reset: (id: number) => void
-    }
-  }
-}
-
-function loadCaptchaScript(): Promise<void> {
-  return new Promise<void>((resolve) => {
-    if (typeof window === "undefined") return resolve()
-    if (window.smartCaptcha) return resolve()
-
-    const SCRIPT_ID = "ysc-captcha-script"
-    let script = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null
-
-    if (!script) {
-      script = document.createElement("script")
-      script.id = SCRIPT_ID
-      script.src = "https://captcha-api.yandex.ru/captcha.js"
-      document.head.appendChild(script)
-    }
-
-    // Скрипт уже загружен но window.smartCaptcha ещё не готов — ждём
-    script.addEventListener("load", () => resolve(), { once: true })
-    script.addEventListener("error", () => resolve(), { once: true })
-
-    // Если скрипт уже загружен (событие load уже стрельнуло)
-    if ((script as HTMLScriptElement & { readyState?: string }).readyState === "complete") {
-      resolve()
-    }
-  })
-}
-
-function CaptchaWidget({ onToken }: { onToken: (t: string) => void }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const widgetId = useRef<number | null>(null)
-  const [status, setStatus] = useState<"loading" | "ok" | "failed">("loading")
-
-  useEffect(() => {
-    let cancelled = false
-
-    loadCaptchaScript().then(() => {
-      if (cancelled) return
-
-      if (!containerRef.current || !window.smartCaptcha) {
-        setStatus("failed")
-        onToken("__captcha_unavailable__")
-        return
-      }
-
-      // Уничтожаем предыдущий виджет если был (React StrictMode)
-      if (widgetId.current !== null) {
-        try { window.smartCaptcha!.destroy(widgetId.current) } catch { /* ignore */ }
-        widgetId.current = null
-      }
-
-      try {
-        widgetId.current = window.smartCaptcha.render(containerRef.current, {
-          sitekey: CAPTCHA_SITE_KEY,
-          callback: (t: string) => { onToken(t) },
-        })
-        setStatus("ok")
-      } catch (e) {
-        console.warn("[SmartCaptcha] render failed:", e)
-        setStatus("failed")
-        onToken("__captcha_unavailable__")
-      }
-    })
-
-    return () => {
-      cancelled = true
-      if (window.smartCaptcha && widgetId.current !== null) {
-        try { window.smartCaptcha.destroy(widgetId.current) } catch { /* ignore */ }
-        widgetId.current = null
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  if (status === "failed") {
-    return (
-      <div className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-700">
-        Капча недоступна — проверьте ключ в Яндекс Облаке
-      </div>
-    )
-  }
-
-  return <div ref={containerRef} className="mt-1" />
-}
+import { CaptchaWidget } from "./captcha-widget"
 
 // ─── Общие стили ─────────────────────────────────────────────────────────────
 
@@ -414,8 +319,12 @@ export function AuthScreen({ mode, onSuccess, onBack, onSwitchToAdmin }: AuthScr
       </button>
 
       <div className="animate-fade-up w-full max-w-[420px] border border-border bg-secondary px-10 py-12">
-        {/* Лого */}
-        <div className="mb-5 flex flex-col items-center gap-2">
+        {/* Лого — кнопка Вернуться */}
+        <div
+          className="mb-5 flex cursor-pointer flex-col items-center gap-1 transition-opacity hover:opacity-70"
+          onClick={step === "code" ? () => setStep("form") : onBack}
+          title="Вернуться на главную"
+        >
           {mode === "login" ? (
             <>
               <OlalaLogoAnimated size={100} className="flex flex-col items-center" />
@@ -426,6 +335,10 @@ export function AuthScreen({ mode, onSuccess, onBack, onSwitchToAdmin }: AuthScr
           ) : (
             <OlalaLogo width={110} />
           )}
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mt-1 opacity-30">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
         </div>
 
         <h2 className="mb-1.5 font-serif text-[30px] font-light">{heading}</h2>
