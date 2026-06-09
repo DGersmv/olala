@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { verifyCode } from "@/lib/otp-store"
-import { supabaseAdmin } from "@/lib/supabase"
+import { createUser, getUserByEmail, updateLastLogin } from "@/lib/users-db"
 import { sessionCookieOptions } from "@/lib/session"
 
 const MESSAGES = {
@@ -17,20 +17,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Параметры не указаны" }, { status: 400 })
   }
 
-  // 1. Проверяем OTP
   const result = verifyCode(email, String(code))
   if (result !== "ok") {
     return NextResponse.json({ error: MESSAGES[result] }, { status: 400 })
   }
 
-  // 2. Ищем пользователя в Supabase
-  const { data: existing } = await supabaseAdmin
-    .from("users")
-    .select("*")
-    .eq("email", email.toLowerCase())
-    .single()
-
-  let user = existing
+  const existing = await getUserByEmail(email)
 
   if (mode === "login" && !existing) {
     return NextResponse.json(
@@ -45,32 +37,23 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  let user = existing
+
   if (!existing) {
-    // Регистрация — создаём нового пользователя
-    const { data: created, error } = await supabaseAdmin
-      .from("users")
-      .insert({
-        email: email.toLowerCase(),
+    try {
+      user = await createUser({
+        email,
         name: name ?? email.split("@")[0],
         phone: phone ?? "",
         is_admin: false,
       })
-      .select()
-      .single()
-
-    if (error || !created) {
+    } catch {
       return NextResponse.json({ error: "Ошибка создания аккаунта" }, { status: 500 })
     }
-    user = created
   } else {
-    // Обновляем last_login_at
-    await supabaseAdmin
-      .from("users")
-      .update({ last_login_at: new Date().toISOString() })
-      .eq("id", existing.id)
+    await updateLastLogin(existing.id)
   }
 
-  // 3. Ставим session cookie и возвращаем данные
   const res = NextResponse.json({
     ok: true,
     user: {

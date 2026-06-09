@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: olala
+      POSTGRES_PASSWORD: olala
+      POSTGRES_DB: olala
+    ports:
+      - "5432:5432"
+    volumes:
+      - olala_pg:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+
+volumes:
+  olala_pg:

@@ -182,7 +182,38 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ---
 
-## 8. Обновление кода с GitHub
+## 8. PostgreSQL (база Olala)
+
+БД крутится **на том же VPS**, доступ только с localhost (`127.0.0.1:5432`).
+
+```bash
+sudo apt install -y postgresql postgresql-contrib
+sudo -u postgres psql -c "CREATE USER olala WITH PASSWORD 'ВАШ_ПАРОЛЬ';"
+sudo -u postgres psql -c "CREATE DATABASE olala OWNER olala;"
+sudo -u postgres psql -d olala -f /var/www/olala/schema.sql
+```
+
+В `/var/www/olala/.env.local`:
+
+```env
+DATABASE_URL=postgresql://olala:ВАШ_ПАРОЛЬ@127.0.0.1:5432/olala
+```
+
+Проверка:
+
+```bash
+psql "$DATABASE_URL" -c "select count(*) from users;"
+```
+
+Бэкап (cron раз в сутки):
+
+```bash
+pg_dump postgresql://olala:ПАРОЛЬ@127.0.0.1:5432/olala > /var/backups/olala-$(date +%F).sql
+```
+
+---
+
+## 9. Обновление кода с GitHub
 
 ```bash
 cd /var/www/olala
@@ -194,7 +225,7 @@ pm2 restart olala
 
 ---
 
-## 9. Диагностика (кратко)
+## 10. Диагностика (кратко)
 
 | Симптом | Куда смотреть |
 |---------|----------------|
@@ -205,6 +236,6 @@ pm2 restart olala
 
 ---
 
-## 10. Если снова `Permission denied (publickey)` (SSH)
+## 11. Если снова `Permission denied (publickey)` (SSH)
 
 Проверить `~admin/.ssh/authorized_keys`, права **700** на `.ssh`, **600** на `authorized_keys`. Диагностика: `ssh -v admin@213.171.29.225`.

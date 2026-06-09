@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/session"
-import { supabaseAdmin } from "@/lib/supabase"
+import { listAllDatesWithUsers } from "@/lib/dates-db"
 
 export async function GET() {
   const user = await getSession()
@@ -8,21 +8,11 @@ export async function GET() {
     return NextResponse.json({ error: "Нет доступа" }, { status: 403 })
   }
 
-  // Все даты с данными пользователя
-  const { data, error } = await supabaseAdmin
-    .from("dates")
-    .select(`
-      *,
-      users (
-        id,
-        name,
-        email,
-        phone
-      )
-    `)
-    .order("date", { ascending: true })
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  return NextResponse.json({ dates: data ?? [] })
+  try {
+    const dates = await listAllDatesWithUsers()
+    return NextResponse.json({ dates })
+  } catch (err) {
+    console.error("[admin/dates]", err)
+    return NextResponse.json({ error: "Ошибка базы данных" }, { status: 500 })
+  }
 }

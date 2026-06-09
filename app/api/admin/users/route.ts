@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/session"
-import { supabaseAdmin } from "@/lib/supabase"
+import { listNonAdminUsers } from "@/lib/users-db"
 
 export async function GET() {
   const user = await getSession()
@@ -8,13 +8,11 @@ export async function GET() {
     return NextResponse.json({ error: "Нет доступа" }, { status: 403 })
   }
 
-  const { data, error } = await supabaseAdmin
-    .from("users")
-    .select("id, name, email, phone, created_at, last_login_at")
-    .eq("is_admin", false)
-    .order("created_at", { ascending: false })
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  return NextResponse.json({ users: data ?? [] })
+  try {
+    const users = await listNonAdminUsers()
+    return NextResponse.json({ users })
+  } catch (err) {
+    console.error("[admin/users]", err)
+    return NextResponse.json({ error: "Ошибка базы данных" }, { status: 500 })
+  }
 }

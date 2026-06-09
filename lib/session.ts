@@ -1,8 +1,8 @@
 import { cookies } from "next/headers"
-import { supabaseAdmin } from "./supabase"
-import type { Database } from "./database.types"
+import { getUserById } from "./users-db"
+import type { User } from "./database.types"
 
-export type SessionUser = Database["public"]["Tables"]["users"]["Row"]
+export type SessionUser = User
 
 const COOKIE = "olala_uid"
 const MAX_AGE = 60 * 60 * 24 * 30 // 30 дней
@@ -11,14 +11,7 @@ const MAX_AGE = 60 * 60 * 24 * 30 // 30 дней
 export async function getSession(): Promise<SessionUser | null> {
   const uid = (await cookies()).get(COOKIE)?.value
   if (!uid) return null
-
-  const { data } = await supabaseAdmin
-    .from("users")
-    .select("*")
-    .eq("id", uid)
-    .single()
-
-  return data ?? null
+  return getUserById(uid)
 }
 
 /** Устанавливает cookie сессии (вызывать из Route Handler) */

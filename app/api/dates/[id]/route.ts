@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/session"
-import { supabaseAdmin } from "@/lib/supabase"
+import { deleteDate } from "@/lib/dates-db"
 
-// DELETE /api/dates/[id]
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -12,13 +11,12 @@ export async function DELETE(
 
   const { id } = await params
 
-  const { error } = await supabaseAdmin
-    .from("dates")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", user.id) // защита: только свои даты
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  return NextResponse.json({ ok: true })
+  try {
+    const ok = await deleteDate(user.id, id)
+    if (!ok) return NextResponse.json({ error: "Дата не найдена" }, { status: 404 })
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error("[dates DELETE]", err)
+    return NextResponse.json({ error: "Ошибка базы данных" }, { status: 500 })
+  }
 }
