@@ -16,14 +16,6 @@ export function OlalaApp({ catalogPhotos }: { catalogPhotos: CatalogPhotos }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [dates, setDates] = useState<DateEntry[]>([])
   const [fadeIn, setFadeIn] = useState(true)
-  const [heroIdx, setHeroIdx] = useState(0)
-
-  // Hero image rotation
-  useEffect(() => {
-    const t = setInterval(() => setHeroIdx((i) => (i + 1) % 5), 5000)
-    return () => clearInterval(t)
-  }, [])
-
   // Восстановление сессии при загрузке
   useEffect(() => {
     fetch("/api/auth/me")
@@ -104,7 +96,7 @@ export function OlalaApp({ catalogPhotos }: { catalogPhotos: CatalogPhotos }) {
     <div className="min-h-screen overflow-hidden bg-background text-foreground">
       <div className="min-h-screen transition-opacity duration-400" style={{ opacity: fadeIn ? 1 : 0 }}>
         {screen === "landing" && (
-          <LandingScreen onAuth={handleAuth} heroIdx={heroIdx} />
+          <LandingScreen onAuth={handleAuth} />
         )}
         {screen === "register" && (
           <RegisterScreen onSuccess={handleAuth} onBack={() => navigate("landing")} />

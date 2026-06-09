@@ -1,34 +1,27 @@
 "use client"
 
-import { useState, useEffect, useRef, type CSSProperties } from "react"
+import { useState, useEffect, useRef } from "react"
 import { OlalaLogoAnimated } from "./olala-logo-animated"
 import { ShopSvg } from "./shop-svg"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { REGEXP_ONLY_DIGITS } from "input-otp"
-import { Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import type { AuthUser } from "./auth-screens"
 import { CaptchaWidget } from "./captcha-widget"
+import { InstagramFeedWidget } from "./instagram-feed-widget"
 
 interface LandingScreenProps {
   onAuth: (user: AuthUser) => void
-  heroIdx: number
 }
 
 type FormStep = "email" | "register" | "otp"
 
-const heroGradients = [
-  "linear-gradient(135deg, #faf6f2 0%, #f5e6e0 50%, #faf6f2 100%)",
-  "linear-gradient(135deg, #faf6f2 0%, #f0ddd6 50%, #f5efe9 100%)",
-  "linear-gradient(135deg, #f5e6e0 0%, #faf6f2 50%, #f0e0d8 100%)",
-  "linear-gradient(135deg, #faf6f2 0%, #f5e0d5 50%, #faf6f2 100%)",
-  "linear-gradient(135deg, #f0ddd6 0%, #faf6f2 50%, #f5e6e0 100%)",
-]
-
-const flowerImages = Array.from({ length: 10 }, (_, i) => `/landing/${String(i + 1).padStart(2, "0")}.jpg`)
+const heroGradient =
+  "linear-gradient(135deg, rgba(250, 246, 242, 0.85) 0%, rgba(240, 221, 214, 0.85) 50%, rgba(245, 239, 233, 0.85) 100%)"
 
 const inputCls = "w-full border border-input bg-muted px-4 py-3 font-sans text-sm font-light text-foreground transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 
-export function LandingScreen({ onAuth, heroIdx }: LandingScreenProps) {
+export function LandingScreen({ onAuth }: LandingScreenProps) {
   const [expanded, setExpanded] = useState(false)
   const [shopPhase, setShopPhase] = useState(0)
 
@@ -89,7 +82,13 @@ export function LandingScreen({ onAuth, heroIdx }: LandingScreenProps) {
 
   const resetForm = () => {
     setFormStep("email"); setEmail(""); setName(""); setPhone("")
-    setOtp(""); setError(null); setLoading(false)
+    setOtp(""); setError(null); setLoading(false); setCaptchaToken(null)
+  }
+
+  const handleBackToHome = () => {
+    setExpanded(false)
+    setShopPhase(0)
+    resetForm()
   }
 
   // Шаг 1: проверяем email → новый или существующий
@@ -168,67 +167,41 @@ export function LandingScreen({ onAuth, heroIdx }: LandingScreenProps) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Gradient background */}
+    <div className="relative h-screen overflow-hidden">
+      {/* Instagram background */}
+      <div className="instagram-bg pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
+        <InstagramFeedWidget visible={!expanded} />
+      </div>
+
+      {/* Semi-transparent gradient overlay */}
       <div
-        className="absolute inset-0 -z-20 transition-all duration-2000"
-        style={{ background: heroGradients[heroIdx] }}
+        className="pointer-events-none absolute inset-0 z-[1] transition-opacity duration-700"
+        style={{ background: heroGradient, opacity: expanded ? 0 : 1 }}
       />
 
-      {/* Background flower cards — плавно исчезают при expanded */}
-      <div
-        className="pointer-events-none absolute inset-0 z-[1] hidden lg:block transition-opacity duration-700"
-        style={{ opacity: expanded ? 0 : 1 }}
-        aria-hidden
+      {/* ── Назад на главную (expanded) ── */}
+      <button
+        type="button"
+        onClick={handleBackToHome}
+        aria-label="Вернуться"
+        className={`fixed left-3 top-3 z-30 flex items-center gap-2 border border-foreground/20 bg-background/90 px-3 py-2.5 text-foreground shadow-md backdrop-blur-sm transition-all duration-500 hover:border-primary/50 hover:text-primary sm:left-5 sm:top-5 sm:gap-2.5 sm:px-4 sm:py-3${expanded ? " pointer-events-auto opacity-100" : " pointer-events-none opacity-0"}`}
       >
-        {flowerImages.map((src, i) => {
-          const step = 360 / flowerImages.length
-          const angleDeg = -90 + i * step
-          return (
-            <div
-              key={src}
-              className="animate-flower-bloom absolute left-1/2 top-1/2 h-32 w-32 overflow-hidden rounded shadow-sm"
-              style={{
-                "--petal-angle": `${angleDeg}deg`,
-                "--petal-radius": "min(42vw, 46vh)",
-                animationDelay: `${300 + i * 90}ms`,
-                zIndex: i,
-              } as CSSProperties}
-            >
-              <img src={src} alt="" className="h-full w-full object-cover" />
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Floating petals — тоже исчезают */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 transition-opacity duration-700"
-        style={{ opacity: expanded ? 0 : 1 }}
-      >
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="animate-petal absolute size-2 rounded-[50%_50%_50%_0] bg-[rgba(196,50,74,0.2)]"
-            style={{
-              left: `${10 + i * 15}%`,
-              animationDelay: `${i * 1.2}s`,
-              animationDuration: `${8 + i * 2}s`,
-            }}
-          />
-        ))}
-      </div>
+        <ArrowLeft className="size-5 shrink-0 sm:size-6" strokeWidth={1.75} />
+        <span className="font-sans text-[11px] font-normal uppercase tracking-[0.2em] sm:text-xs">
+          Вернуться
+        </span>
+      </button>
 
       {/* ── Логотип — сжимается и уходит в верхний левый угол ── */}
       <div
-        onClick={expanded ? () => { setExpanded(false); setShopPhase(0); setEmail("") } : undefined}
+        onClick={expanded ? handleBackToHome : undefined}
         className={`fixed z-20 flex flex-col items-center gap-2${expanded ? " cursor-pointer" : ""}`}
         style={{
           top: 0,
           left: 0,
           transform: expanded && logoTarget
             ? `translate(${logoTarget.x}px, ${logoTarget.y}px) scale(0.4)`
-            : "translate(calc(50vw - 140px), calc(50vh - 300px)) scale(1)",
+            : "translate(calc(50vw - 140px), calc(50vh - 350px)) scale(1)",
           transformOrigin: "top left",
           transition: "transform 1.4s ease-in-out",
         }}
@@ -263,54 +236,47 @@ export function LandingScreen({ onAuth, heroIdx }: LandingScreenProps) {
 
       {/* ── Центральный контент (исчезает при expanded) ── */}
       <div
-        className="relative z-10 grid min-h-screen w-full grid-rows-[1fr_auto_1fr] px-5 transition-opacity duration-500"
+        className="relative z-10 flex h-full w-full flex-col items-center justify-center px-5 text-center transition-opacity duration-500"
         style={{ opacity: expanded ? 0 : 1, pointerEvents: expanded ? "none" : "auto" }}
       >
-        <div aria-hidden className="min-h-0" />
-        <div className="mx-auto flex w-full max-w-[680px] min-h-0 flex-col items-center justify-center py-6 text-center">
+        <div className="mx-auto flex w-full max-w-[600px] flex-col items-center">
           {/* Placeholder высоты логотипа */}
-          <div className="mb-8" style={{ height: 360 }} />
+          <div className="mb-4" style={{ height: 320 }} />
 
-          <p className="animate-fade-up mb-4 font-serif text-[26px] font-light leading-relaxed" style={{ animationDelay: "0.15s" }}>
-            Забудьте о забытых датах.
-            <br />
+          <p className="animate-fade-up mb-3 font-serif text-[22px] font-light leading-snug sm:text-[24px]" style={{ animationDelay: "0.15s" }}>
+            Авторские букеты и композиции для моментов,{" "}
+            <span className="italic text-primary">которые хочется запомнить.</span>
+          </p>
+
+          <p className="animate-fade-up mb-8 font-serif text-[18px] font-light leading-snug sm:text-[20px]" style={{ animationDelay: "0.25s" }}>
+            Забудьте о забытых датах.{" "}
             <span className="italic text-primary">Мы помним за Вас.</span>
           </p>
 
-          <p className="animate-fade-up mx-auto mb-2 max-w-[480px] text-sm leading-relaxed opacity-50" style={{ animationDelay: "0.25s" }}>
-            Зарегистрируйтесь, добавьте важные даты — и в нужный день ваши близкие
-            получат авторский букет от нашего флориста.
-          </p>
-          <p className="animate-fade-up mx-auto mb-10 max-w-[480px] text-sm leading-relaxed opacity-50" style={{ animationDelay: "0.28s" }}>
-            Без напоминаний, без забот.
-          </p>
-
-          {/* Кнопка-ссылка */}
           <button
             onClick={() => setExpanded(true)}
-            className="animate-fade-up group relative font-serif text-[22px] font-light italic text-foreground transition-all hover:text-primary"
+            className="animate-fade-up group relative font-serif text-[20px] font-light italic text-foreground transition-all hover:text-primary sm:text-[22px]"
             style={{ animationDelay: "0.35s" }}
           >
             Расскажите нам
             <span className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-100 bg-current transition-transform duration-300 group-hover:scale-x-110" />
           </button>
 
-          <p className="animate-fade-up mt-8 text-sm opacity-40" style={{ animationDelay: "0.42s" }}>
-            Или просто позвоните
-          </p>
-          <p className="animate-fade-up text-sm font-medium opacity-60" style={{ animationDelay: "0.46s" }}>
-            +7 (921) 188-05-90
+          <p className="animate-fade-up mt-5 text-sm opacity-50" style={{ animationDelay: "0.42s" }}>
+            Или позвоните{" "}
+            <a href="tel:+79211880590" className="font-medium opacity-80 transition-opacity hover:opacity-100">
+              +7 (921) 188-05-90
+            </a>
           </p>
         </div>
-        <div aria-hidden className="min-h-0" />
       </div>
 
       {/* ── Expanded: витрина + поле email ── */}
       <div
-        className="absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-700"
+        className="absolute inset-0 z-10 overflow-y-auto transition-opacity duration-700"
         style={{ opacity: expanded ? 1 : 0, pointerEvents: expanded ? "auto" : "none" }}
       >
-        <div className="flex w-full max-w-[900px] flex-col items-center gap-8 px-6 pt-24 lg:flex-row lg:items-end lg:gap-16">
+        <div className="mx-auto flex min-h-full w-full max-w-[900px] flex-col items-center justify-center gap-8 px-6 py-24 lg:flex-row lg:items-end lg:gap-16">
 
           {/* SVG витрина */}
           <div className="w-full max-w-[340px] shrink-0 text-foreground lg:max-w-[400px]">
@@ -329,6 +295,16 @@ export function LandingScreen({ onAuth, heroIdx }: LandingScreenProps) {
               Добро пожаловать<br />
               <span className="italic text-primary">в наш магазин.</span>
             </p>
+
+            <div className="flex max-w-[360px] flex-col gap-2 text-sm leading-relaxed opacity-50">
+              <p>
+                Собираем вручную, доставляем бережно, оформляем с вниманием к каждой детали.
+              </p>
+              <p>
+                Зарегистрируйтесь, добавьте важные даты — и в нужный день ваши близкие
+                получат авторский букет от нашего флориста. Без напоминаний, без забот.
+              </p>
+            </div>
 
             {/* ── Шаг: email ── */}
             {formStep === "email" && (

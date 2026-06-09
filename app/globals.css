@@ -106,65 +106,79 @@
   }
 }
 
-@keyframes floatPetal {
-  0% {
-    transform: translateY(100vh) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.15;
-  }
-  90% {
-    opacity: 0.15;
-  }
-  100% {
-    transform: translateY(-20vh) rotate(360deg);
-    opacity: 0;
-  }
-}
-
 .animate-fade-up {
   animation: fadeUp 0.6s ease both;
 }
 
-.animate-petal {
-  animation: floatPetal 12s ease-in-out infinite;
+/* Instagram grid — фоновый режим на лендинге */
+.instagram-bg .instagram-bg-grid {
+  /* узкий экран: 1 ряд на всю ширину */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(1, minmax(0, 1fr));
+  height: 36vh;
+  max-height: 420px;
+  opacity: 0;
+  transition: opacity 1.2s ease;
 }
 
-/* Фото с hero: распускание из центра — лучи как лепестки тюльпана */
-@keyframes flowerBloom {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(var(--petal-angle, 0deg))
-      translateY(0) scale(0.55);
-    filter: blur(14px);
-  }
-  48% {
-    opacity: 0.22;
-    filter: blur(8px);
-  }
-  72% {
-    opacity: 0.28;
-    filter: blur(3px);
-  }
-  100% {
-    opacity: 0.32;
-    transform: translate(-50%, -50%) rotate(var(--petal-angle, 0deg))
-      translateY(calc(-1 * var(--petal-radius, 280px))) scale(1);
-    filter: blur(0);
-  }
+.instagram-bg .instagram-bg-grid--visible {
+  opacity: 1;
+  transition: opacity 1.4s ease;
 }
 
-.animate-flower-bloom {
-  animation: flowerBloom 3.2s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+.instagram-bg .instagram-bg-cell {
+  min-height: 0;
+  min-width: 0;
+  background: rgba(250, 246, 242, 0.4);
+}
+
+.instagram-bg .instagram-bg-img {
+  opacity: 0;
+  transform: scale(1.06);
+  filter: blur(6px);
+  transition:
+    opacity 1s ease,
+    transform 1.2s ease,
+    filter 1s ease;
+  transition-delay: var(--ig-delay, 0ms);
+}
+
+.instagram-bg .instagram-bg-img--loaded {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-flower-bloom {
-    animation: none;
-    opacity: 0.32;
+  .instagram-bg .instagram-bg-grid {
+    transition: none;
+    opacity: 1;
+  }
+
+  .instagram-bg .instagram-bg-img {
+    opacity: 1;
+    transform: none;
     filter: none;
-    transform: translate(-50%, -50%) rotate(var(--petal-angle, 0deg))
-      translateY(calc(-1 * var(--petal-radius, 280px))) scale(1);
+    transition: none;
+  }
+}
+
+/* планшет: 2 ряда × 3 колонки */
+@media (min-width: 640px) {
+  .instagram-bg .instagram-bg-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    height: 52vh;
+    max-height: 560px;
+  }
+}
+
+/* десктоп: 3 ряда × 2 колонки — выше полоса по центру */
+@media (min-width: 1024px) {
+  .instagram-bg .instagram-bg-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    height: min(72vh, 720px);
+    max-height: none;
   }
 }
