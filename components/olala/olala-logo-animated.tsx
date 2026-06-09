@@ -30,9 +30,9 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
 
   // Timing from phase 2 trigger (t=1300ms from start):
   //   bud emerge: 0.9s → done at t=2200ms
-  //   phase 3 at t=2200ms, last letter (0.2s delay + 0.65s) → done at t=3050ms
-  //   sway delay from phase 2 = 3050 - 1300 + 300 buffer = 2050ms ≈ 2.1s
-  const swayDelay = "2.1s"
+  //   phase 3 at t=2200ms, last letter (0.3s delay + 1.7s) → done at t=4200ms
+  //   sway delay from phase 2 = 4200 - 1300 + 300 buffer ≈ 3.2s
+  const swayDelay = "3.2s"
 
   return (
     <div
@@ -151,7 +151,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
             opacity: 0,
             animation:
               phase >= 3
-                ? "olalaLetterUp 1.1s 0s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                ? "olalaLetterUp 1.7s 0s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
         >
@@ -167,7 +167,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
             opacity: 0,
             animation:
               phase >= 3
-                ? "olalaLetterUp 1.1s 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                ? "olalaLetterUp 1.7s 0.15s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
         >
@@ -183,7 +183,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
             opacity: 0,
             animation:
               phase >= 3
-                ? "olalaLetterUp 1.1s 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                ? "olalaLetterUp 1.7s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
         >
