@@ -29,3 +29,8 @@ create table if not exists public.dates (
 
 create index if not exists dates_user_id_idx on public.dates(user_id);
 create index if not exists dates_date_idx on public.dates(date);
+
+grant all privileges on all tables in schema public to olala;
+grant all privileges on all sequences in schema public to olala;
+alter default privileges in schema public grant all on tables to olala;
+alter default privileges in schema public grant all on sequences to olala;
