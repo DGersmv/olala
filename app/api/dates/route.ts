@@ -3,12 +3,20 @@ import { getSession } from "@/lib/session"
 import { createDate, listDatesByUserId } from "@/lib/dates-db"
 import type { DateEntry } from "@/lib/olala-constants"
 
+function toIsoDate(value: unknown): string {
+  if (!value) return ""
+  if (value instanceof Date) return value.toISOString().slice(0, 10)
+  const s = String(value)
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})/)
+  return m ? m[1] : s
+}
+
 function toDateEntry(row: Record<string, unknown>): DateEntry {
   return {
     id: row.id as number,
     occasion: (row.occasion as string) ?? "",
     customName: (row.custom_name as string) ?? "",
-    date: (row.date as string) ?? "",
+    date: toIsoDate(row.date),
     recipientName: (row.recipient_name as string) ?? "",
     recipientPhone: (row.recipient_phone as string) ?? "",
     recipientSocials: (row.recipient_socials as string) ?? "",

@@ -1,16 +1,26 @@
 const MONTHS_RU = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
 
+/** YYYY-MM-DD из строки или Date (pg / JSON иногда отдаёт ISO с временем) */
+export function parseDateOnly(value: string | Date): { y: number; m: number; d: number } | null {
+  if (!value) return null
+  const raw = value instanceof Date ? value.toISOString() : String(value)
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (!match) return null
+  return { y: Number(match[1]), m: Number(match[2]), d: Number(match[3]) }
+}
+
 export function formatDate(dateStr: string): string {
-  if (!dateStr) return ""
-  const [, m, day] = dateStr.split("-")
-  return `${parseInt(day)} ${MONTHS_RU[parseInt(m) - 1]}`
+  const parts = parseDateOnly(dateStr)
+  if (!parts) return ""
+  return `${parts.d} ${MONTHS_RU[parts.m - 1]}`
 }
 
 export function daysUntil(dateStr: string): number {
+  const parts = parseDateOnly(dateStr)
+  if (!parts) return 0
   const now = new Date()
   now.setHours(0, 0, 0, 0)
-  const [, m, d] = dateStr.split("-").map(Number)
-  let target = new Date(now.getFullYear(), m - 1, d)
+  let target = new Date(now.getFullYear(), parts.m - 1, parts.d)
   if (target < now) target.setFullYear(target.getFullYear() + 1)
   return Math.ceil((target.getTime() - now.getTime()) / 86400000)
 }
