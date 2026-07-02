@@ -15,7 +15,13 @@ node_modules
 .next/
 .DS_Store
 
-# Локальные файлы не из репозитория
-added/
+# Локальные импорты: медиа не коммитим, структуру папок — да
+added/*
+!added/from_inst/
+added/from_inst/**
+!added/from_inst/README.md
+!added/from_inst/*/
+added/from_inst/*/*
+!added/from_inst/*/.gitkeep
 *.zip
 olala-flower-shop.jsx

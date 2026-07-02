@@ -9,22 +9,43 @@ interface FeedPost {
 
 const STAGGER_MS = 120
 const REVEAL_START_MS = 100
+const FEED_RETRY_MS = 4000
+const FEED_MAX_ATTEMPTS = 3
 
 export function InstagramFeedWidget({ visible }: { visible: boolean }) {
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [gridVisible, setGridVisible] = useState(false)
   const [loadedIds, setLoadedIds] = useState<Set<string>>(() => new Set())
+  const [failedIds, setFailedIds] = useState<Set<string>>(() => new Set())
 
   useEffect(() => {
     let cancelled = false
-    fetch("/api/instagram/feed")
-      .then((res) => res.json())
-      .then((data: { posts?: FeedPost[] }) => {
-        if (cancelled || !Array.isArray(data.posts) || data.posts.length === 0) return
-        setPosts(data.posts)
-      })
-      .catch(() => {})
-    return () => { cancelled = true }
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
+
+    const loadFeed = (attempt: number) => {
+      fetch("/api/instagram/feed")
+        .then((res) => res.json())
+        .then((data: { posts?: FeedPost[] }) => {
+          if (cancelled) return
+          if (Array.isArray(data.posts) && data.posts.length > 0) {
+            setPosts(data.posts)
+            return
+          }
+          if (attempt + 1 < FEED_MAX_ATTEMPTS) {
+            retryTimer = setTimeout(() => loadFeed(attempt + 1), FEED_RETRY_MS)
+          }
+        })
+        .catch(() => {
+          if (cancelled || attempt + 1 >= FEED_MAX_ATTEMPTS) return
+          retryTimer = setTimeout(() => loadFeed(attempt + 1), FEED_RETRY_MS)
+        })
+    }
+
+    loadFeed(0)
+    return () => {
+      cancelled = true
+      if (retryTimer) clearTimeout(retryTimer)
+    }
   }, [])
 
   useEffect(() => {
@@ -75,6 +96,16 @@ export function InstagramFeedWidget({ visible }: { visible: boolean }) {
     })
   }, [visible])
 
+  const handleImageError = useCallback((id: string) => {
+    if (!visible) return
+    setFailedIds((prev) => {
+      if (prev.has(id)) return prev
+      const next = new Set(prev)
+      next.add(id)
+      return next
+    })
+  }, [visible])
+
   if (posts.length === 0) return null
 
   return (
@@ -92,10 +123,14 @@ export function InstagramFeedWidget({ visible }: { visible: boolean }) {
               ref={(el) => { if (el?.complete && visible) handleImageLoad(post.id) }}
               src={post.imageUrl}
               alt=""
-              className={`instagram-bg-img h-full w-full object-cover${loadedIds.has(post.id) ? " instagram-bg-img--loaded" : ""}`}
-              loading="lazy"
+              className={`instagram-bg-img h-full w-full object-cover${
+                loadedIds.has(post.id) ? " instagram-bg-img--loaded" : ""
+              }${failedIds.has(post.id) ? " instagram-bg-img--failed" : ""}`}
+              loading="eager"
               decoding="async"
+              fetchPriority={index < 6 ? "high" : "low"}
               onLoad={() => handleImageLoad(post.id)}
+              onError={() => handleImageError(post.id)}
             />
           </div>
         ))}

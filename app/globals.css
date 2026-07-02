@@ -149,6 +149,12 @@
   filter: blur(0);
 }
 
+.instagram-bg .instagram-bg-img--failed {
+  opacity: 0.35;
+  transform: scale(1);
+  filter: blur(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .instagram-bg .instagram-bg-grid {
     transition: none;

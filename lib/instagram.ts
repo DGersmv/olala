@@ -22,6 +22,7 @@ const IG_HEADERS = {
 }
 
 const RETRY_DELAYS_MS = [2000, 5000, 10000]
+const REQUEST_TIMEOUT_MS = 15000
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -105,7 +106,11 @@ async function fetchWithRetry(url: string, init: RequestInit): Promise<Response>
   let lastRes: Response | null = null
 
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
-    const res = await fetchViaInstagramProxy(url, { ...init, cache: "no-store" })
+    const res = await fetchViaInstagramProxy(url, {
+      ...init,
+      cache: "no-store",
+      signal: init.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
     if (res.status !== 429) return res
     lastRes = res
     const delay = RETRY_DELAYS_MS[attempt]
@@ -146,6 +151,7 @@ async function fetchViaEmbedPage(username: string): Promise<InstagramPost[]> {
     {
       headers: { "User-Agent": IG_EMBED_USER_AGENT },
       cache: "no-store",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     },
   )
   if (!res.ok) throw new Error(`embed_page ${res.status}`)

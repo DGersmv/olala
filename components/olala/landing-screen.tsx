@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import type { AuthUser } from "./auth-screens"
 import { CaptchaWidget } from "./captcha-widget"
 import { InstagramFeedWidget } from "./instagram-feed-widget"
+import { RhododendronWidget } from "./rhododendron-widget"
 
 interface LandingScreenProps {
   onAuth: (user: AuthUser) => void
@@ -167,6 +168,7 @@ export function LandingScreen({ onAuth }: LandingScreenProps) {
   }
 
   return (
+    <>
     <div className="relative h-screen overflow-hidden">
       {/* Instagram background */}
       <div className="instagram-bg pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
@@ -377,5 +379,7 @@ export function LandingScreen({ onAuth }: LandingScreenProps) {
         </div>
       </div>
     </div>
+    <RhododendronWidget visible={!expanded} />
+    </>
   )
 }
