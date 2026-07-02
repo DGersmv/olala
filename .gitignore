@@ -18,10 +18,14 @@ node_modules
 # Локальные импорты: медиа не коммитим, структуру папок — да
 added/*
 !added/from_inst/
+!added/3DModels/
 added/from_inst/**
 !added/from_inst/README.md
 !added/from_inst/*/
 added/from_inst/*/*
 !added/from_inst/*/.gitkeep
+added/3DModels/**
+!added/3DModels/*.glb
+!added/3DModels/*.bat
 *.zip
 olala-flower-shop.jsx
