@@ -6,6 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  transpilePackages: ["@lumaai/luma-web", "three"],
 }
 
 export default nextConfig

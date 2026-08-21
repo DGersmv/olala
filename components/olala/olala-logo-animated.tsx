@@ -6,10 +6,17 @@ interface OlalaLogoAnimatedProps {
   /** CSS width/height of the SVG (square) */
   size?: number
   className?: string
+  /** Повторять сборку логотипа (вперёд → сброс → вперёд) */
+  loop?: boolean
 }
 
-export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedProps) {
+const FADE_START_MS = 4600
+const FADE_DURATION_MS = 1000
+
+export function OlalaLogoAnimated({ size = 280, className, loop = false }: OlalaLogoAnimatedProps) {
   const [phase, setPhase] = useState(0)
+  const [cycleKey, setCycleKey] = useState(0)
+  const [logoOpacity, setLogoOpacity] = useState(1)
 
   const runAnimation = useCallback(() => {
     setPhase(0)
@@ -23,10 +30,22 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
     }
   }, [])
 
-  // Запуск один раз при монтировании
   useEffect(() => {
     return runAnimation()
-  }, [runAnimation])
+  }, [runAnimation, cycleKey])
+
+  useEffect(() => {
+    if (!loop) return
+    const fadeTimer = setTimeout(() => setLogoOpacity(0), FADE_START_MS)
+    const cycleTimer = setTimeout(() => {
+      setCycleKey((k) => k + 1)
+      setLogoOpacity(1)
+    }, FADE_START_MS + FADE_DURATION_MS)
+    return () => {
+      clearTimeout(fadeTimer)
+      clearTimeout(cycleTimer)
+    }
+  }, [loop, cycleKey])
 
   // Timing from phase 2 trigger (t=1300ms from start):
   //   bud emerge: 0.9s → done at t=2200ms
@@ -61,15 +80,19 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
           100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes olalaTulipSway {
-          0%        { transform: rotate(0deg); }
-          14%       { transform: rotate(4deg); }
-          35%       { transform: rotate(-3deg); }
-          50%       { transform: rotate(1deg); }
-          60%, 100% { transform: rotate(0deg); }
+          0%   { transform: rotate(-4deg); }
+          100% { transform: rotate(4deg); }
         }
       `}</style>
 
+      <div
+        style={{
+          opacity: loop ? logoOpacity : 1,
+          transition: loop ? `opacity ${FADE_DURATION_MS}ms ease-out` : undefined,
+        }}
+      >
       <svg
+        key={cycleKey}
         viewBox="0 0 220 220"
         width={size}
         height={size}
@@ -113,7 +136,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
             transformOrigin: "82px 45px",
             animation:
               phase >= 2
-                ? `olalaTulipSway 3s ease-in-out ${swayDelay} infinite`
+                ? `olalaTulipSway 2.4s ease-in-out ${swayDelay} infinite alternate`
                 : "none",
           }}
         >
@@ -193,6 +216,7 @@ export function OlalaLogoAnimated({ size = 280, className }: OlalaLogoAnimatedPr
           />
         </g>
       </svg>
+      </div>
     </div>
   )
 }

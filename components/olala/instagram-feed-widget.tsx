@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState, type CSSProperties } from "react"
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react"
 
 interface FeedPost {
   id: string
@@ -11,12 +11,16 @@ const STAGGER_MS = 120
 const REVEAL_START_MS = 100
 const FEED_RETRY_MS = 4000
 const FEED_MAX_ATTEMPTS = 3
+/** Сетка в CSS рассчитана на 6 ячеек (6×1 / 3×2 / 2×3) */
+const BG_POST_COUNT = 6
 
 export function InstagramFeedWidget({ visible }: { visible: boolean }) {
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [gridVisible, setGridVisible] = useState(false)
   const [loadedIds, setLoadedIds] = useState<Set<string>>(() => new Set())
   const [failedIds, setFailedIds] = useState<Set<string>>(() => new Set())
+
+  const displayPosts = useMemo(() => posts.slice(0, BG_POST_COUNT), [posts])
 
   useEffect(() => {
     let cancelled = false
@@ -70,9 +74,9 @@ export function InstagramFeedWidget({ visible }: { visible: boolean }) {
   }, [visible, posts])
 
   useEffect(() => {
-    if (!visible || !gridVisible || posts.length === 0) return
+    if (!visible || !gridVisible || displayPosts.length === 0) return
 
-    const timers = posts.map((post, index) =>
+    const timers = displayPosts.map((post, index) =>
       setTimeout(() => {
         setLoadedIds((prev) => {
           if (prev.has(post.id)) return prev
@@ -84,7 +88,7 @@ export function InstagramFeedWidget({ visible }: { visible: boolean }) {
     )
 
     return () => timers.forEach(clearTimeout)
-  }, [visible, gridVisible, posts])
+  }, [visible, gridVisible, displayPosts])
 
   const handleImageLoad = useCallback((id: string) => {
     if (!visible) return
@@ -106,14 +110,14 @@ export function InstagramFeedWidget({ visible }: { visible: boolean }) {
     })
   }, [visible])
 
-  if (posts.length === 0) return null
+  if (displayPosts.length === 0) return null
 
   return (
     <div className="flex h-full w-full items-center justify-center">
       <div
         className={`instagram-bg-grid grid w-full gap-0.5${gridVisible ? " instagram-bg-grid--visible" : ""}`}
       >
-        {posts.map((post, index) => (
+        {displayPosts.map((post, index) => (
           <div
             key={post.id}
             className="instagram-bg-cell overflow-hidden"

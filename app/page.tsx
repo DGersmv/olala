@@ -1,7 +1,5 @@
-import { OlalaApp } from "@/components/olala/olala-app"
-import { getCatalogPhotos } from "@/lib/catalog-photos"
+import { UnderConstructionScreen } from "@/components/olala/under-construction-screen"
 
 export default function Home() {
-  const catalogPhotos = getCatalogPhotos()
-  return <OlalaApp catalogPhotos={catalogPhotos} />
+  return <UnderConstructionScreen />
 }

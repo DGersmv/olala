@@ -10,7 +10,7 @@
 |-----|----------|
 | Домен | **olala-flowers.ru** |
 | DNS-серверы | `ns1.reg.ru`, `ns2.reg.ru` |
-| Запись **A** `@` | публичный IP VPS (у нас **213.171.29.225**) |
+| Запись **A** `@` | публичный IP VPS (сейчас **192.144.13.78**, ВМ `olala-227`) |
 | Запись **A** `www` | тот же IP |
 
 Проверка: `nslookup olala-flowers.ru` → ожидается IP VPS. Глобально: [dnschecker.org](https://dnschecker.org).
@@ -25,15 +25,18 @@
 
 | Поле | Значение |
 |------|----------|
-| Публичный IP | **213.171.29.225** (проверять в панели) |
-| Пользователь | **`admin`** |
+| Публичный IP | **192.144.13.78** (ВМ `olala-227`, id `c05db56a-ffbd-426d-b49f-38fc3a71f6bc`) |
+| Пользователь | **`user1`** |
+| SSH-ключ (локально) | `~/.ssh/id_ed25519_cloudru` |
 | Вход | SSH-ключ в `~/.ssh/authorized_keys` |
 
 ```text
-ssh admin@213.171.29.225
+ssh -i ~/.ssh/id_ed25519_cloudru -o IdentitiesOnly=yes user1@192.144.13.78
 ```
 
-С другого ПК: скопировать пару `id_ed25519` + `id_ed25519.pub` или добавить новый `.pub` на сервер.
+Старая ВМ (**213.171.29.225**, пользователь `admin`) больше не используется для Olala — там могут остаться nordlab и другие сайты.
+
+С другого ПК: скопировать пару `id_ed25519_cloudru` + `.pub` или добавить новый `.pub` на сервер.
 
 ---
 
@@ -89,6 +92,8 @@ sudo ufw status
 sudo mkdir -p /var/www/olala
 sudo chown -R "$USER:$USER" /var/www/olala
 ```
+
+Рабочий пользователь на `olala-227`: **`user1`**.
 
 ---
 
@@ -179,6 +184,8 @@ sudo nginx -t && sudo systemctl reload nginx
 ```
 
 Проверка: `sudo ss -tlnp | grep nginx` — должны быть **0.0.0.0:80** и **0.0.0.0:443**.
+
+Снаружи: `Test-NetConnection 192.144.13.78 -Port 443` → **True**. Если **False** при живом Nginx — не открыта/не привязана группа безопасности Cloud.ru (п. 3).
 
 ---
 
