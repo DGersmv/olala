@@ -6,9 +6,25 @@ const IG_USER_AGENT =
 // embed-страница отдаёт посты только с коротким UA (полный Chrome → пустой shell)
 const IG_EMBED_USER_AGENT = "Mozilla/5.0"
 
+export const INSTAGRAM_FEED_SIZE = 8
+
 export interface InstagramPost {
   id: string
   imageUrl: string
+}
+
+/** Stable id from CDN path so a post stays the same across cache refreshes. */
+export function instagramPostKey(imageUrl: string): string {
+  try {
+    const raw = imageUrl.includes("/api/instagram/image")
+      ? new URL(imageUrl, "http://local").searchParams.get("url") ?? imageUrl
+      : imageUrl
+    const pathname = new URL(raw).pathname
+    const file = pathname.split("/").filter(Boolean).pop() ?? pathname
+    return file.replace(/\.[a-z0-9]+$/i, "") || raw
+  } catch {
+    return imageUrl
+  }
 }
 
 const IG_HEADERS = {
@@ -158,24 +174,41 @@ async function fetchViaEmbedPage(username: string): Promise<InstagramPost[]> {
   return parsePostsFromHtml(await res.text())
 }
 
-export async function fetchInstagramPosts(username: string, limit = 20): Promise<InstagramPost[]> {
-  try {
-    const posts = await fetchViaEmbedPage(username)
-    if (posts.length > 0) return posts.slice(0, limit)
-  } catch {
-    /* fall through */
+function mergePosts(groups: InstagramPost[][], limit: number): InstagramPost[] {
+  const merged: InstagramPost[] = []
+  const seen = new Set<string>()
+
+  for (const group of groups) {
+    for (const post of group) {
+      const key = instagramPostKey(post.imageUrl)
+      if (seen.has(key)) continue
+      seen.add(key)
+      merged.push({ id: key, imageUrl: post.imageUrl })
+      if (merged.length >= limit) return merged
+    }
   }
 
-  for (const source of [fetchViaProfileHtml, fetchViaWebProfileApi]) {
+  return merged
+}
+
+export async function fetchInstagramPosts(
+  username: string,
+  limit = INSTAGRAM_FEED_SIZE,
+): Promise<InstagramPost[]> {
+  const groups: InstagramPost[][] = []
+
+  for (const source of [fetchViaEmbedPage, fetchViaProfileHtml, fetchViaWebProfileApi]) {
     try {
       const posts = await source(username)
-      if (posts.length > 0) return posts.slice(0, limit)
+      if (posts.length > 0) groups.push(posts)
+      const merged = mergePosts(groups, limit)
+      if (merged.length >= limit) return merged
     } catch {
       /* try next source */
     }
   }
 
-  return []
+  return mergePosts(groups, limit)
 }
 
 export function isAllowedInstagramImageUrl(url: string): boolean {

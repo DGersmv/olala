@@ -12,7 +12,9 @@ interface OlalaLogoAnimatedProps {
   animate?: boolean
 }
 
-const FADE_START_MS = 4600
+const SWAY_START_MS = 4200
+const SWAY_DURATION_MS = 2200
+const FADE_START_MS = SWAY_START_MS + SWAY_DURATION_MS
 const FADE_DURATION_MS = 1000
 export const OLALA_LOGO_LOADING_SIZE = 180
 export const OLALA_LOGO_HERO_SIZE = 280
@@ -32,10 +34,12 @@ export function OlalaLogoAnimated({
     const t1 = setTimeout(() => setPhase(1), 300)
     const t2 = setTimeout(() => setPhase(2), 1300)
     const t3 = setTimeout(() => setPhase(3), 2200)
+    const t4 = setTimeout(() => setPhase(4), SWAY_START_MS)
     return () => {
       clearTimeout(t1)
       clearTimeout(t2)
       clearTimeout(t3)
+      clearTimeout(t4)
     }
   }, [])
 
@@ -57,7 +61,6 @@ export function OlalaLogoAnimated({
     }
   }, [loop, cycleKey, animate])
 
-  const swayDelay = "3.2s"
   const assembled = !animate
 
   return (
@@ -87,8 +90,10 @@ export function OlalaLogoAnimated({
           100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes olalaTulipSway {
-          0%   { transform: rotate(-4deg); }
-          100% { transform: rotate(4deg); }
+          0%   { transform: rotate(0deg); }
+          28%  { transform: rotate(-8deg); }
+          62%  { transform: rotate(8deg); }
+          100% { transform: rotate(0deg); }
         }
       `}</style>
 
@@ -144,8 +149,8 @@ export function OlalaLogoAnimated({
           style={{
             transformOrigin: "82px 45px",
             animation:
-              !assembled && phase >= 2
-                ? `olalaTulipSway 2.4s ease-in-out ${swayDelay} infinite alternate`
+              !assembled && phase >= 4
+                ? `olalaTulipSway ${SWAY_DURATION_MS}ms ease-in-out 1 both`
                 : "none",
           }}
         >

@@ -33,7 +33,7 @@ type SiteLoadContextValue = {
 
 const SiteLoadContext = createContext<SiteLoadContextValue | null>(null)
 
-const PHOTO_PREFETCH = 20
+const PHOTO_PREFETCH = 8
 const LOAD_TIMEOUT_MS = 45000
 
 function loadImage(src: string) {

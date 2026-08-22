@@ -29,3 +29,7 @@ added/3DModels/**
 !added/3DModels/*.bat
 *.zip
 olala-flower-shop.jsx
+
+# Кэш ленты Instagram на сервере (последние 8 фото)
+data/instagram-feed.json
+data/*.tmp
