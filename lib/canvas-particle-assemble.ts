@@ -14,6 +14,19 @@ export type CanvasParticle = {
   a: number
   startSize: number
   endSize: number
+  rotation: number
+}
+
+/** Unit petal: notched top, rounded tip at the bottom. Local space ≈ -0.5..0.5. */
+function createPetalPath() {
+  const path = new Path2D()
+  path.moveTo(0, 0.52)
+  path.bezierCurveTo(-0.38, 0.28, -0.5, -0.02, -0.46, -0.28)
+  path.bezierCurveTo(-0.4, -0.48, -0.16, -0.5, 0, -0.34)
+  path.bezierCurveTo(0.16, -0.5, 0.4, -0.48, 0.46, -0.28)
+  path.bezierCurveTo(0.5, -0.02, 0.38, 0.28, 0, 0.52)
+  path.closePath()
+  return path
 }
 
 export async function loadDecodedImage(url: string) {
@@ -98,6 +111,7 @@ export function sampleCanvasParticles(
         a: alpha,
         startSize: cell * (1.6 + Math.random() * 2.2),
         endSize: Math.max(2.4, cell * 0.9),
+        rotation: Math.random() * Math.PI * 2,
       })
     }
   }
@@ -116,6 +130,7 @@ export function runCanvasParticleAnimation(
 ) {
   const ctx = canvas.getContext("2d")
   if (!ctx) throw new Error("2d context unavailable")
+  const petalPath = createPetalPath()
 
   let raf = 0
   const startedAt = performance.now()
@@ -149,10 +164,18 @@ export function runCanvasParticleAnimation(
 
       if (alpha <= 0.02) continue
 
+      const cos = Math.cos(p.rotation)
+      const sin = Math.sin(p.rotation)
+      ctx.setTransform(
+        scaleX * cos * size,
+        scaleY * sin * size,
+        -scaleX * sin * size,
+        scaleY * cos * size,
+        scaleX * x,
+        scaleY * y,
+      )
       ctx.fillStyle = `rgba(${p.r}, ${p.g}, ${p.b}, ${alpha})`
-      ctx.beginPath()
-      ctx.arc(x, y, size / 2, 0, Math.PI * 2)
-      ctx.fill()
+      ctx.fill(petalPath)
     }
 
     if (rawT >= 1) {
