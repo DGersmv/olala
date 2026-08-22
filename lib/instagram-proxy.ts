@@ -2,6 +2,32 @@ import nodeFetch, { type RequestInit as NodeFetchInit } from "node-fetch"
 import { HttpsProxyAgent } from "https-proxy-agent"
 import type { Agent } from "http"
 
+const CDN_IMAGE_HEADERS = {
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+  Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+  Referer: "https://www.instagram.com/",
+}
+
+const IMAGE_RETRY_DELAYS_MS = [400, 1200, 2500]
+const IMAGE_TIMEOUT_MS = 12000
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function isRetryableNetworkError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false
+  const code = (error as { code?: string }).code
+  return (
+    code === "ECONNRESET" ||
+    code === "ETIMEDOUT" ||
+    code === "ECONNREFUSED" ||
+    code === "EAI_AGAIN" ||
+    code === "UND_ERR_CONNECT_TIMEOUT"
+  )
+}
+
 function buildProxyUrl(): string | null {
   const host = process.env.INSTAGRAM_PROXY_HOST
   const port = process.env.INSTAGRAM_PROXY_PORT
@@ -63,4 +89,38 @@ export async function fetchViaInstagramProxy(
     statusText: res.statusText,
     headers: Object.fromEntries(res.headers.entries()),
   })
+}
+
+export async function fetchInstagramCdnImage(url: string): Promise<Response> {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt <= IMAGE_RETRY_DELAYS_MS.length; attempt++) {
+    try {
+      const res = await fetchViaInstagramProxy(url, {
+        cache: "no-store",
+        headers: CDN_IMAGE_HEADERS,
+        signal: AbortSignal.timeout(IMAGE_TIMEOUT_MS),
+      })
+
+      if (res.ok || res.status === 404 || res.status === 403) {
+        return res
+      }
+
+      if (res.status >= 500 && attempt < IMAGE_RETRY_DELAYS_MS.length) {
+        await sleep(IMAGE_RETRY_DELAYS_MS[attempt])
+        continue
+      }
+
+      return res
+    } catch (error) {
+      lastError = error
+      if (isRetryableNetworkError(error) && attempt < IMAGE_RETRY_DELAYS_MS.length) {
+        await sleep(IMAGE_RETRY_DELAYS_MS[attempt])
+        continue
+      }
+      throw error
+    }
+  }
+
+  throw lastError ?? new Error("Failed to fetch Instagram CDN image")
 }

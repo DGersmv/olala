@@ -8,12 +8,21 @@ interface OlalaLogoAnimatedProps {
   className?: string
   /** Повторять сборку логотипа (вперёд → сброс → вперёд) */
   loop?: boolean
+  /** Если false — статичный собранный логотип без анимации */
+  animate?: boolean
 }
 
 const FADE_START_MS = 4600
 const FADE_DURATION_MS = 1000
+export const OLALA_LOGO_LOADING_SIZE = 180
+export const OLALA_LOGO_HERO_SIZE = 280
 
-export function OlalaLogoAnimated({ size = 280, className, loop = false }: OlalaLogoAnimatedProps) {
+export function OlalaLogoAnimated({
+  size = 280,
+  className,
+  loop = false,
+  animate = true,
+}: OlalaLogoAnimatedProps) {
   const [phase, setPhase] = useState(0)
   const [cycleKey, setCycleKey] = useState(0)
   const [logoOpacity, setLogoOpacity] = useState(1)
@@ -31,11 +40,12 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
   }, [])
 
   useEffect(() => {
+    if (!animate) return
     return runAnimation()
-  }, [runAnimation, cycleKey])
+  }, [runAnimation, cycleKey, animate])
 
   useEffect(() => {
-    if (!loop) return
+    if (!animate || !loop) return
     const fadeTimer = setTimeout(() => setLogoOpacity(0), FADE_START_MS)
     const cycleTimer = setTimeout(() => {
       setCycleKey((k) => k + 1)
@@ -45,18 +55,15 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
       clearTimeout(fadeTimer)
       clearTimeout(cycleTimer)
     }
-  }, [loop, cycleKey])
+  }, [loop, cycleKey, animate])
 
-  // Timing from phase 2 trigger (t=1300ms from start):
-  //   bud emerge: 0.9s → done at t=2200ms
-  //   phase 3 at t=2200ms, last letter (0.3s delay + 1.7s) → done at t=4200ms
-  //   sway delay from phase 2 = 4200 - 1300 + 300 buffer ≈ 3.2s
   const swayDelay = "3.2s"
+  const assembled = !animate
 
   return (
     <div
       className={className}
-      onClick={runAnimation}
+      onClick={animate ? runAnimation : undefined}
       role="img"
       aria-label="Olala — нажмите, чтобы повторить анимацию"
       title="Нажмите, чтобы повторить анимацию"
@@ -87,25 +94,27 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
 
       <div
         style={{
-          opacity: loop ? logoOpacity : 1,
-          transition: loop ? `opacity ${FADE_DURATION_MS}ms ease-out` : undefined,
+          opacity: animate && loop ? logoOpacity : 1,
+          transition: animate && loop ? `opacity ${FADE_DURATION_MS}ms ease-out` : undefined,
         }}
       >
       <svg
         key={cycleKey}
         viewBox="0 0 220 220"
-        width={size}
-        height={size}
         className="cursor-pointer overflow-visible"
+        style={{
+          width: size,
+          height: size,
+        }}
       >
         {/* First L — tall stem, grows up at phase 1 */}
         <g
           style={{
             animation:
-              phase >= 1
+              !assembled && phase >= 1
                 ? "olalaStemGrow 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards"
                 : "none",
-            clipPath: phase >= 1 ? undefined : "inset(100% 0 0 0)",
+            clipPath: assembled || phase >= 1 ? undefined : "inset(100% 0 0 0)",
           }}
         >
           <path
@@ -118,10 +127,10 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
         <g
           style={{
             animation:
-              phase >= 1
+              !assembled && phase >= 1
                 ? "olalaStemGrow 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards"
                 : "none",
-            clipPath: phase >= 1 ? undefined : "inset(100% 0 0 0)",
+            clipPath: assembled || phase >= 1 ? undefined : "inset(100% 0 0 0)",
           }}
         >
           <path
@@ -135,7 +144,7 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
           style={{
             transformOrigin: "82px 45px",
             animation:
-              phase >= 2
+              !assembled && phase >= 2
                 ? `olalaTulipSway 2.4s ease-in-out ${swayDelay} infinite alternate`
                 : "none",
           }}
@@ -144,10 +153,10 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
           <g
             style={{
               transformOrigin: "82px 22px",
-              opacity: 0,
-              transform: "scale(0) translateY(6px)",
+              opacity: assembled ? 1 : 0,
+              transform: assembled ? "none" : "scale(0) translateY(6px)",
               animation:
-                phase >= 2
+                !assembled && phase >= 2
                   ? "olalaBudEmerge 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards"
                   : "none",
             }}
@@ -160,9 +169,11 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
               d="m68.77 20.51c1.49 4.67 4.04 11.47 9.81 15.23-0.61 0.27-3.54 0.44-6.11-2.8-3.37-4.22-3.7-10.78-3.7-12.43z"
               fill="#FEFFFE"
               style={{
-                opacity: 0,
+                opacity: assembled ? 0.9 : 0,
                 animation:
-                  phase >= 2 ? "olalaHighlightFade 0.4s 0.6s ease-out forwards" : "none",
+                  !assembled && phase >= 2
+                    ? "olalaHighlightFade 0.4s 0.6s ease-out forwards"
+                    : "none",
               }}
             />
           </g>
@@ -171,9 +182,9 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
         {/* O — appears after tulip */}
         <g
           style={{
-            opacity: 0,
+            opacity: assembled ? 1 : 0,
             animation:
-              phase >= 3
+              !assembled && phase >= 3
                 ? "olalaLetterUp 1.7s 0s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
@@ -187,9 +198,9 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
         {/* First A — appears after tulip */}
         <g
           style={{
-            opacity: 0,
+            opacity: assembled ? 1 : 0,
             animation:
-              phase >= 3
+              !assembled && phase >= 3
                 ? "olalaLetterUp 1.7s 0.15s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}
@@ -203,9 +214,9 @@ export function OlalaLogoAnimated({ size = 280, className, loop = false }: Olala
         {/* Second A — appears after tulip */}
         <g
           style={{
-            opacity: 0,
+            opacity: assembled ? 1 : 0,
             animation:
-              phase >= 3
+              !assembled && phase >= 3
                 ? "olalaLetterUp 1.7s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards"
                 : "none",
           }}

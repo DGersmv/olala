@@ -1,19 +1,15 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-
-export const OLALA_INBOX_CAPTURE =
-  "https://lumalabs.ai/capture/918250fc-a1ea-4d1a-979b-b241517d4bd2"
+import { OLALA_LUMA_ARTIFACTS, OLALA_LUMA_SCENE_SRC } from "@/lib/luma-scene"
+import { useSiteLoad, useSiteLoadTask } from "./site-load-context"
 
 const REVEAL_AMOUNT = 0.8
 const REVEAL_SPEED = 0.18
-const AUTO_ROTATE_SPEED = 0.22
-const PHOTO_SPAWN_GAP_MS = 2600
-const PHOTO_ASSEMBLE_MS = 4800
-const PHOTO_MAX = 8
-const PHOTO_GRID = 80
-/** Share of viewport height a photo should occupy. */
-const PHOTO_SCREEN_HEIGHT = 0.42
+const AUTO_ROTATE_SPEED = 0.4
+const AUTO_ROTATE_STOP_MS = 10_000
+const SCENE_APPEAR_DELAY_MS = 3_000
+const SCENE_FADE_MS = 900
 
 type LumaLoadingAnimation = {
   enabled: boolean
@@ -30,11 +26,6 @@ type LumaWebGL = {
 
 type LumaSplat = import("@lumaai/luma-web").LumaSplatsThree & {
   lumaSplatsWebGL: LumaWebGL | null
-}
-
-type FeedPost = {
-  id: string
-  imageUrl: string
 }
 
 function elapsedMsForReveal(amount: number) {
@@ -57,131 +48,31 @@ function freezeReveal(splat: LumaSplat, freezeElapsedMs: number) {
   }
 }
 
-function easeOutCubic(t: number) {
-  return 1 - Math.pow(1 - t, 3)
-}
-
-function loadImage(src: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image()
-    image.decoding = "async"
-    image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error(`Failed to load ${src}`))
-    image.src = src
-  })
-}
-
-function createPhotoBurst(
-  THREE: typeof import("three"),
-  image: HTMLImageElement,
-  pixelRatio: number,
-) {
-  const cols = PHOTO_GRID
-  const rows = PHOTO_GRID
-  const canvas = document.createElement("canvas")
-  canvas.width = cols
-  canvas.height = rows
-  const ctx = canvas.getContext("2d", { willReadFrequently: true })
-  if (!ctx) throw new Error("2d context unavailable")
-  ctx.drawImage(image, 0, 0, cols, rows)
-  const pixels = ctx.getImageData(0, 0, cols, rows).data
-
-  const aspect = Math.min(
-    Math.max(image.naturalWidth / Math.max(image.naturalHeight, 1), 0.7),
-    1.35,
-  )
-  const height = 1
-  const width = height * aspect
-
-  const targets: number[] = []
-  const starts: number[] = []
-  const colors: number[] = []
-
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const i = (row * cols + col) * 4
-      const alpha = pixels[i + 3] / 255
-      if (alpha < 0.12) continue
-      const x = (col / (cols - 1) - 0.5) * width
-      const y = (0.5 - row / (rows - 1)) * height
-      targets.push(x, y, 0)
-      starts.push(
-        x + (Math.random() - 0.5) * 1.1,
-        y + (Math.random() - 0.5) * 1.1,
-        (Math.random() - 0.5) * 0.9,
-      )
-      colors.push(
-        (pixels[i] / 255) * alpha,
-        (pixels[i + 1] / 255) * alpha,
-        (pixels[i + 2] / 255) * alpha,
-      )
-    }
-  }
-
-  const geometry = new THREE.BufferGeometry()
-  geometry.setAttribute("position", new THREE.Float32BufferAttribute(targets, 3))
-  geometry.setAttribute("aStart", new THREE.Float32BufferAttribute(starts, 3))
-  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3))
-
-  const progress = { value: 0 }
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      uProgress: progress,
-      uPixelRatio: { value: pixelRatio },
-      uResolution: { value: new THREE.Vector2(1, 1) },
-      uFov: { value: 55 * (Math.PI / 180) },
-      uPhotoHeight: { value: 1 },
-    },
-    vertexShader: `
-      attribute vec3 aStart;
-      attribute vec3 color;
-      varying vec3 vColor;
-      varying float vProgress;
-      uniform float uProgress;
-      uniform float uPixelRatio;
-      uniform vec2 uResolution;
-      uniform float uFov;
-      uniform float uPhotoHeight;
-      void main() {
-        float t = uProgress;
-        vec3 p = mix(aStart, position, t);
-        vec4 mv = modelViewMatrix * vec4(p, 1.0);
-        gl_Position = projectionMatrix * mv;
-        float worldPoint = (uPhotoHeight / 80.0) * mix(0.9, 1.55, t);
-        float pixelsPerWorld = uResolution.y / (2.0 * tan(uFov * 0.5) * max(-mv.z, 0.05));
-        gl_PointSize = clamp(worldPoint * pixelsPerWorld * uPixelRatio, 3.0, 64.0);
-        vColor = color;
-        vProgress = t;
-      }
-    `,
-    fragmentShader: `
-      varying vec3 vColor;
-      varying float vProgress;
-      void main() {
-        vec2 uv = gl_PointCoord - vec2(0.5);
-        float d = length(uv);
-        if (d > 0.5) discard;
-        float alpha = smoothstep(0.5, 0.16, d) * mix(0.55, 0.95, vProgress);
-        gl_FragColor = vec4(vColor, alpha);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.NormalBlending,
-  })
-
-  const points = new THREE.Points(geometry, material)
-  points.frustumCulled = false
-  return { points, progress, geometry, material, startedAt: 0 }
-}
-
 type LumaSceneViewerProps = {
   className?: string
 }
 
 export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [ready, setReady] = useState(false)
+  const { phase, markSceneRotationStart } = useSiteLoad()
+  const runtimeTask = useSiteLoadTask("runtime")
+  const lumaTask = useSiteLoadTask("luma")
+  const [sceneVisible, setSceneVisible] = useState(false)
+  const phaseRef = useRef(phase)
+  const sceneVisibleRef = useRef(false)
+  const markRotationRef = useRef(markSceneRotationStart)
+  phaseRef.current = phase
+  sceneVisibleRef.current = sceneVisible
+  markRotationRef.current = markSceneRotationStart
+
+  useEffect(() => {
+    if (phase !== "done") {
+      setSceneVisible(false)
+      return
+    }
+    const timer = window.setTimeout(() => setSceneVisible(true), SCENE_APPEAR_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [phase])
 
   useEffect(() => {
     const container = containerRef.current
@@ -192,20 +83,16 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
     let controls: { dispose: () => void } | undefined
     let splat: LumaSplat | undefined
     let resizeObserver: ResizeObserver | undefined
-    const photoBursts: Array<{
-      points: import("three").Points
-      progress: { value: number }
-      geometry: import("three").BufferGeometry
-      material: import("three").ShaderMaterial
-      startedAt: number
-    }> = []
 
     async function setup() {
+      runtimeTask.setProgress(0.05)
       const THREE = await import("three")
+      runtimeTask.setProgress(0.35)
       const { OrbitControls } = await import(
         "three/examples/jsm/controls/OrbitControls.js"
       )
       const { LumaSplatsThree } = await import("@lumaai/luma-web")
+      runtimeTask.complete()
 
       if (disposed || !container) return
 
@@ -247,17 +134,15 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
       controls = orbit
 
       const splatScene = new LumaSplatsThree({
-        source: OLALA_INBOX_CAPTURE,
+        source: {
+          src: OLALA_LUMA_SCENE_SRC,
+          artifacts: OLALA_LUMA_ARTIFACTS,
+        },
         particleRevealEnabled: true,
         enableThreeShaderIntegration: false,
       }) as LumaSplat
 
       const freezeElapsedMs = elapsedMsForReveal(REVEAL_AMOUNT) / REVEAL_SPEED
-      const worldCenter = new THREE.Vector3()
-      const ndc = new THREE.Vector3()
-      const towardCam = new THREE.Vector3()
-      const right = new THREE.Vector3()
-      const up = new THREE.Vector3()
 
       splatScene.onInitialCameraTransform = (transform) => {
         transform.decompose(camera.position, camera.quaternion, new THREE.Vector3())
@@ -267,90 +152,17 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
       }
 
       splatScene.onProgress = ({ progress }) => {
-        if (!disposed && progress > 0.04) setReady(true)
+        if (!disposed) lumaTask.setProgress(Math.max(progress, 0.05))
       }
 
       splatScene.onLoad = () => {
-        if (!disposed) setReady(true)
+        if (!disposed) lumaTask.complete()
       }
 
       scene.add(splatScene)
       splat = splatScene
 
-      let posts: FeedPost[] = []
-      fetch("/api/instagram/feed")
-        .then((res) => res.json())
-        .then((data: { posts?: FeedPost[] }) => {
-          if (!disposed && Array.isArray(data.posts)) posts = data.posts.slice(0, PHOTO_MAX)
-        })
-        .catch(() => {})
-
-      let halfCrossed = false
-      let prevScreenX: number | null = null
-      let nextPhoto = 0
-      let spawning = false
-      let lastSpawnAt = 0
-
-      const placePhoto = (
-        burst: {
-          points: import("three").Points
-          material: import("three").ShaderMaterial
-        },
-        index: number,
-      ) => {
-        const dist = Math.max(camera.position.distanceTo(orbit.target), 0.6)
-        const fov = (camera.fov * Math.PI) / 180
-        const photoDist = dist * 0.58
-        const worldHeight = 2 * Math.tan(fov / 2) * photoDist * PHOTO_SCREEN_HEIGHT
-
-        towardCam.subVectors(camera.position, orbit.target).normalize()
-        right.crossVectors(towardCam, camera.up).normalize()
-        if (right.lengthSq() < 0.01) {
-          right.set(1, 0, 0)
-        }
-        up.crossVectors(right, towardCam).normalize()
-
-        const side = index % 2 === 0 ? 1 : -1
-        const slot = Math.floor(index / 2)
-        burst.points.scale.setScalar(worldHeight)
-        burst.points.position.copy(orbit.target)
-          .addScaledVector(towardCam, dist * 0.42)
-          .addScaledVector(right, side * worldHeight * (0.72 + slot * 0.18))
-          .addScaledVector(up, ((slot % 2) * 2 - 1) * worldHeight * 0.16)
-        burst.points.lookAt(camera.position)
-
-        burst.material.uniforms.uPhotoHeight.value = worldHeight
-        burst.material.uniforms.uFov.value = fov
-        burst.material.uniforms.uPixelRatio.value = webglRenderer.getPixelRatio()
-        burst.material.uniforms.uResolution.value.set(
-          container.clientWidth,
-          container.clientHeight,
-        )
-      }
-
-      const spawnPhoto = async () => {
-        if (spawning || nextPhoto >= posts.length || disposed) return
-        spawning = true
-        const post = posts[nextPhoto++]
-        try {
-          const image = await loadImage(post.imageUrl)
-          if (disposed) return
-          const burst = createPhotoBurst(
-            THREE,
-            image,
-            webglRenderer.getPixelRatio(),
-          )
-          burst.startedAt = performance.now()
-          placePhoto(burst, photoBursts.length)
-          scene.add(burst.points)
-          photoBursts.push(burst)
-          lastSpawnAt = performance.now()
-        } catch {
-          lastSpawnAt = performance.now()
-        } finally {
-          spawning = false
-        }
-      }
+      let sceneVisibleSince: number | null = null
 
       const onResize = () => {
         const width = container.clientWidth
@@ -364,48 +176,24 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
       resizeObserver.observe(container)
 
       webglRenderer.setAnimationLoop(() => {
+        if (phaseRef.current !== "done" || !sceneVisibleRef.current) {
+          return
+        }
+
+        if (sceneVisibleSince === null) {
+          sceneVisibleSince = performance.now()
+          markRotationRef.current()
+        }
+
+        if (
+          orbit.autoRotate &&
+          performance.now() - sceneVisibleSince >= AUTO_ROTATE_STOP_MS
+        ) {
+          orbit.autoRotate = false
+        }
+
         freezeReveal(splatScene, freezeElapsedMs)
         orbit.update()
-
-        const sphere = splatScene.boundingSphere
-        if (sphere && sphere.radius > 0.15) {
-          worldCenter.copy(sphere.center).applyMatrix4(splatScene.matrixWorld)
-          ndc.copy(worldCenter).project(camera)
-          const screenX = (ndc.x * 0.5 + 0.5) * container.clientWidth
-          const mid = container.clientWidth / 2
-          if (!halfCrossed && prevScreenX != null) {
-            const crossed =
-              (prevScreenX < mid && screenX >= mid) ||
-              (prevScreenX > mid && screenX <= mid)
-            if (crossed) {
-              halfCrossed = true
-              lastSpawnAt = 0
-            }
-          }
-          prevScreenX = screenX
-        }
-
-        const now = performance.now()
-        if (
-          halfCrossed &&
-          posts.length > 0 &&
-          now - lastSpawnAt > PHOTO_SPAWN_GAP_MS
-        ) {
-          void spawnPhoto()
-        }
-
-        for (const burst of photoBursts) {
-          const t = Math.min((now - burst.startedAt) / PHOTO_ASSEMBLE_MS, 1)
-          burst.progress.value = easeOutCubic(t) * 0.9
-          burst.points.lookAt(camera.position)
-          burst.material.uniforms.uPhotoHeight.value = burst.points.scale.x
-          burst.material.uniforms.uFov.value = (camera.fov * Math.PI) / 180
-          burst.material.uniforms.uPixelRatio.value = webglRenderer.getPixelRatio()
-          burst.material.uniforms.uResolution.value.set(
-            container.clientWidth,
-            container.clientHeight,
-          )
-        }
 
         webglRenderer.render(scene, camera)
       })
@@ -413,31 +201,30 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
 
     setup().catch((error) => {
       console.error("Luma scene failed to start", error)
+      runtimeTask.complete()
+      lumaTask.complete()
     })
 
     return () => {
       disposed = true
       resizeObserver?.disconnect()
       renderer?.setAnimationLoop(null)
-      for (const burst of photoBursts) {
-        burst.geometry.dispose()
-        burst.material.dispose()
-      }
       splat?.dispose()
       controls?.dispose()
       renderer?.dispose()
       renderer?.domElement.remove()
     }
-  }, [])
+  }, [runtimeTask, lumaTask])
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      style={{
+        opacity: sceneVisible ? 1 : 0,
+        transition: `opacity ${SCENE_FADE_MS}ms ease-out`,
+      }}
+    >
       <div ref={containerRef} className="absolute inset-0" />
-      <div
-        className="pointer-events-none absolute inset-0 bg-[#faf6f2] transition-opacity duration-700"
-        style={{ opacity: ready ? 0 : 1 }}
-        aria-hidden
-      />
     </div>
   )
 }

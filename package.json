@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "setup:from-inst": "node scripts/setup-from-inst-folders.mjs",
     "sort:from-inst": "node scripts/sort-instagram-downloads.mjs",
+    "download:luma-scene": "node scripts/download-luma-scene.mjs",
     "download:from-inst": "powershell -ExecutionPolicy Bypass -File scripts/download-instagram-highlights.ps1"
   },
   "dependencies": {
@@ -50,6 +51,7 @@
     "cmdk": "1.1.1",
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.6.0",
+    "html2canvas": "^1.4.1",
     "https-proxy-agent": "^9.1.0",
     "input-otp": "1.4.2",
     "lucide-react": "^0.564.0",
