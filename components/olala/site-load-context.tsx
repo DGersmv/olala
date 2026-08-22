@@ -34,14 +34,24 @@ type SiteLoadContextValue = {
 const SiteLoadContext = createContext<SiteLoadContextValue | null>(null)
 
 const PHOTO_PREFETCH = 8
-const LOAD_TIMEOUT_MS = 45000
+const LOAD_TIMEOUT_MS = 18000
 
-function loadImage(src: string) {
+function loadImage(src: string, timeoutMs = 8000) {
   return new Promise<void>((resolve, reject) => {
     const image = new Image()
+    const timer = window.setTimeout(() => {
+      image.src = ""
+      reject(new Error(`Timed out loading ${src}`))
+    }, timeoutMs)
     image.decoding = "async"
-    image.onload = () => resolve()
-    image.onerror = () => reject(new Error(`Failed to load ${src}`))
+    image.onload = () => {
+      window.clearTimeout(timer)
+      resolve()
+    }
+    image.onerror = () => {
+      window.clearTimeout(timer)
+      reject(new Error(`Failed to load ${src}`))
+    }
     image.src = src
   })
 }

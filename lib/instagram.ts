@@ -195,9 +195,15 @@ export async function fetchInstagramPosts(
   username: string,
   limit = INSTAGRAM_FEED_SIZE,
 ): Promise<InstagramPost[]> {
-  const groups: InstagramPost[][] = []
+  try {
+    const posts = await fetchViaEmbedPage(username)
+    if (posts.length > 0) return mergePosts([posts], limit)
+  } catch {
+    /* fall through to slower sources only if embed is empty */
+  }
 
-  for (const source of [fetchViaEmbedPage, fetchViaProfileHtml, fetchViaWebProfileApi]) {
+  const groups: InstagramPost[][] = []
+  for (const source of [fetchViaProfileHtml, fetchViaWebProfileApi]) {
     try {
       const posts = await source(username)
       if (posts.length > 0) groups.push(posts)

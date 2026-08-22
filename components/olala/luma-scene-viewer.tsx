@@ -83,6 +83,7 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
     let controls: { dispose: () => void } | undefined
     let splat: LumaSplat | undefined
     let resizeObserver: ResizeObserver | undefined
+    let lumaSafetyTimer: ReturnType<typeof setTimeout> | undefined
 
     async function setup() {
       runtimeTask.setProgress(0.05)
@@ -151,13 +152,24 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
         orbit.update()
       }
 
+      let lumaCompleted = false
+      const completeLuma = () => {
+        if (disposed || lumaCompleted) return
+        lumaCompleted = true
+        if (lumaSafetyTimer) window.clearTimeout(lumaSafetyTimer)
+        lumaTask.complete()
+      }
+
       splatScene.onProgress = ({ progress }) => {
         if (!disposed) lumaTask.setProgress(Math.max(progress, 0.05))
+        if (progress >= 0.99) completeLuma()
       }
 
       splatScene.onLoad = () => {
-        if (!disposed) lumaTask.complete()
+        completeLuma()
       }
+
+      lumaSafetyTimer = window.setTimeout(() => completeLuma(), 12_000)
 
       scene.add(splatScene)
       splat = splatScene
@@ -176,24 +188,26 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
       resizeObserver.observe(container)
 
       webglRenderer.setAnimationLoop(() => {
-        if (phaseRef.current !== "done" || !sceneVisibleRef.current) {
-          return
-        }
+        const isLive = phaseRef.current === "done" && sceneVisibleRef.current
 
-        if (sceneVisibleSince === null) {
-          sceneVisibleSince = performance.now()
-          markRotationRef.current()
-        }
+        if (isLive) {
+          if (sceneVisibleSince === null) {
+            sceneVisibleSince = performance.now()
+            markRotationRef.current()
+          }
 
-        if (
-          orbit.autoRotate &&
-          performance.now() - sceneVisibleSince >= AUTO_ROTATE_STOP_MS
-        ) {
-          orbit.autoRotate = false
-        }
+          if (
+            orbit.autoRotate &&
+            performance.now() - sceneVisibleSince >= AUTO_ROTATE_STOP_MS
+          ) {
+            orbit.autoRotate = false
+          }
 
-        freezeReveal(splatScene, freezeElapsedMs)
-        orbit.update()
+          freezeReveal(splatScene, freezeElapsedMs)
+          orbit.update()
+        } else {
+          freezeReveal(splatScene, freezeElapsedMs)
+        }
 
         webglRenderer.render(scene, camera)
       })
@@ -207,6 +221,7 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
 
     return () => {
       disposed = true
+      if (lumaSafetyTimer) window.clearTimeout(lumaSafetyTimer)
       resizeObserver?.disconnect()
       renderer?.setAnimationLoop(null)
       splat?.dispose()
