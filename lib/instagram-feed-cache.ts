@@ -3,6 +3,7 @@ import path from "node:path"
 import {
   INSTAGRAM_FEED_SIZE,
   instagramPostKey,
+  sanitizeInstagramCaption,
   type InstagramPost,
 } from "@/lib/instagram"
 
@@ -14,23 +15,34 @@ type CacheFile = {
   posts: InstagramPost[]
 }
 
+function storedPost(post: InstagramPost, key: string, caption?: string): InstagramPost {
+  const text = caption || post.caption
+  return text ? { id: key, imageUrl: post.imageUrl, caption: text } : { id: key, imageUrl: post.imageUrl }
+}
+
 export function mergeInstagramFeed(
   fresh: InstagramPost[],
   previous: InstagramPost[],
   limit = INSTAGRAM_FEED_SIZE,
 ): InstagramPost[] {
-  const merged: InstagramPost[] = []
-  const seen = new Set<string>()
+  const byKey = new Map<string, InstagramPost>()
+  const order: string[] = []
 
   for (const post of [...fresh, ...previous]) {
     const key = instagramPostKey(post.imageUrl)
-    if (seen.has(key)) continue
-    seen.add(key)
-    merged.push({ id: key, imageUrl: post.imageUrl })
-    if (merged.length >= limit) break
+    const existing = byKey.get(key)
+    if (existing) {
+      if (!existing.caption && post.caption) {
+        byKey.set(key, storedPost(existing, key, post.caption))
+      }
+      continue
+    }
+    if (order.length >= limit) continue
+    order.push(key)
+    byKey.set(key, storedPost(post, key))
   }
 
-  return merged
+  return order.map((key) => byKey.get(key)!)
 }
 
 export async function readInstagramFeed(): Promise<InstagramPost[]> {
@@ -38,12 +50,16 @@ export async function readInstagramFeed(): Promise<InstagramPost[]> {
     const raw = await readFile(CACHE_FILE, "utf8")
     const parsed = JSON.parse(raw) as CacheFile
     if (!Array.isArray(parsed.posts)) return []
-    return parsed.posts.filter(
-      (post): post is InstagramPost =>
-        Boolean(post) &&
-        typeof post.imageUrl === "string" &&
-        post.imageUrl.startsWith("https://"),
-    )
+    return parsed.posts.flatMap((post) => {
+      if (!post || typeof post.imageUrl !== "string" || !post.imageUrl.startsWith("https://")) {
+        return []
+      }
+      const caption =
+        typeof post.caption === "string" ? sanitizeInstagramCaption(post.caption) : undefined
+      return caption
+        ? [{ id: post.id, imageUrl: post.imageUrl, caption }]
+        : [{ id: post.id, imageUrl: post.imageUrl }]
+    })
   } catch {
     return []
   }

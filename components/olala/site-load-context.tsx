@@ -17,6 +17,7 @@ export type SiteLoadPhase = "loading" | "dissolving" | "done"
 export type InstagramFeedPost = {
   id: string
   imageUrl: string
+  caption?: string
 }
 
 type SiteLoadContextValue = {

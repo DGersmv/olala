@@ -12,7 +12,7 @@ import { useSiteLoad } from "./site-load-context"
 const PHOTO_START_DELAY_MS = 7_000
 const PHOTO_ASSEMBLE_MS = 4_200
 const PHOTO_FADE_MS = 900
-const PHOTO_HOLD_MS = 2_800
+const PHOTO_HOLD_MS = 4_800
 const PHOTO_DISSOLVE_MS = 4_200
 const PHOTO_MAX = 8
 const PANEL_VERTICAL_INSET = 0.3
@@ -26,6 +26,7 @@ const DESKTOP_MQ = "(min-width: 1024px)"
 type FeedPost = {
   id: string
   imageUrl: string
+  caption?: string
 }
 
 function loadImage(src: string) {
@@ -243,6 +244,7 @@ function useImageAspect(imageUrl: string) {
 
 function ParticlePhotoCard({
   imageUrl,
+  caption,
   cardWidth,
   cardHeight,
   viewportWidth,
@@ -250,6 +252,7 @@ function ParticlePhotoCard({
   onCycleComplete,
 }: {
   imageUrl: string
+  caption?: string
   cardWidth: number
   cardHeight: number
   viewportWidth: number
@@ -360,24 +363,41 @@ function ParticlePhotoCard({
   }, [imageUrl, cardWidth, cardHeight, viewportWidth, viewportHeight])
 
   return (
-    <div
-      ref={cardRef}
-      className="relative shrink-0 overflow-visible"
-      style={{ width: cardWidth, height: cardHeight }}
-    >
-      <img
-        src={imageUrl}
-        alt=""
-        decoding="async"
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{
-          opacity: showPhoto ? 1 : 0,
-          boxShadow: showPhoto
-            ? "0 28px 60px rgba(28, 20, 16, 0.38), 0 10px 22px rgba(28, 20, 16, 0.18)"
-            : "0 0 40px rgba(28, 20, 16, 0)",
-          transition: `opacity ${PHOTO_FADE_MS}ms ease-in-out, box-shadow ${PHOTO_FADE_MS}ms ease-in-out`,
-        }}
-      />
+    <div className="relative shrink-0 overflow-visible" style={{ width: cardWidth }}>
+      <div
+        ref={cardRef}
+        className="relative overflow-visible"
+        style={{ width: cardWidth, height: cardHeight }}
+      >
+        <img
+          src={imageUrl}
+          alt={caption ?? ""}
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{
+            opacity: showPhoto ? 1 : 0,
+            boxShadow: showPhoto
+              ? "0 28px 60px rgba(28, 20, 16, 0.38), 0 10px 22px rgba(28, 20, 16, 0.18)"
+              : "0 0 40px rgba(28, 20, 16, 0)",
+            transition: `opacity ${PHOTO_FADE_MS}ms ease-in-out, box-shadow ${PHOTO_FADE_MS}ms ease-in-out`,
+          }}
+        />
+      </div>
+      {caption ? (
+        <p
+          className="pointer-events-none mt-3 line-clamp-2 px-1 text-center font-serif font-normal leading-snug"
+          style={{
+            color: "#2c221f",
+            fontSize: 18,
+            textShadow:
+              "0 1px 0 rgba(250, 246, 242, 0.95), 0 0 14px rgba(250, 246, 242, 0.9), 0 0 28px rgba(250, 246, 242, 0.7)",
+            opacity: showPhoto ? 1 : 0,
+            transition: `opacity ${PHOTO_FADE_MS}ms ease-in-out`,
+          }}
+        >
+          {caption}
+        </p>
+      ) : null}
       {createPortal(
         <canvas
           ref={canvasRef}
@@ -420,16 +440,16 @@ function PhotoCard({
 
   return (
     <div
-      className="absolute"
+      className="absolute overflow-visible"
       style={{
         left: viewportWidth * (5 / 6) - width / 2,
         top: viewportHeight / 2 - height / 2,
         width,
-        height,
       }}
     >
       <ParticlePhotoCard
         imageUrl={photo.imageUrl}
+        caption={photo.caption}
         cardWidth={width}
         cardHeight={height}
         viewportWidth={viewportWidth}

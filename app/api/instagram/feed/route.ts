@@ -15,6 +15,7 @@ function toResponse(posts: Awaited<ReturnType<typeof rememberInstagramFeed>>) {
       posts: posts.slice(0, INSTAGRAM_FEED_SIZE).map((post) => ({
         id: post.id,
         imageUrl: toProxiedImageUrl(post.imageUrl),
+        ...(post.caption ? { caption: post.caption } : {}),
       })),
     },
     { headers: { "Cache-Control": "public, s-maxage=43200, stale-while-revalidate=86400" } },
