@@ -11,7 +11,13 @@ import type { CatalogPhotos } from "@/lib/catalog-photos"
 
 type Screen = "loading" | "landing" | "register" | "login" | "dashboard" | "admin_dashboard"
 
-export function OlalaApp({ catalogPhotos }: { catalogPhotos: CatalogPhotos }) {
+export function OlalaApp({
+  catalogPhotos,
+  background,
+}: {
+  catalogPhotos: CatalogPhotos
+  background?: string
+}) {
   const [screen, setScreen] = useState<Screen>("loading")
   const [user, setUser] = useState<AuthUser | null>(null)
   const [dates, setDates] = useState<DateEntry[]>([])
@@ -86,14 +92,20 @@ export function OlalaApp({ catalogPhotos }: { catalogPhotos: CatalogPhotos }) {
 
   if (screen === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div
+        className="flex min-h-screen items-center justify-center"
+        style={{ background: background ?? "var(--background)" }}
+      >
         <div className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-background text-foreground">
+    <div
+      className="min-h-screen overflow-hidden text-foreground"
+      style={{ background: background ?? "var(--background)" }}
+    >
       <div className="min-h-screen transition-opacity duration-400" style={{ opacity: fadeIn ? 1 : 0 }}>
         {screen === "landing" && (
           <LandingScreen onAuth={handleAuth} />

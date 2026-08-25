@@ -1,6 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import {
+  OLALA_O_CX,
+  OLALA_O_CY,
+  OLALA_O_INNER_R,
+  PORTAL_PAGE_BG,
+} from "@/lib/intro-portal"
 
 interface OlalaLogoAnimatedProps {
   /** CSS width/height of the SVG (square) */
@@ -10,6 +16,14 @@ interface OlalaLogoAnimatedProps {
   loop?: boolean
   /** Если false — статичный собранный логотип без анимации */
   animate?: boolean
+  /** Остановить цикл и оставить логотип полностью собранным */
+  frozen?: boolean
+  /** Заполнение внутренней части буквы «о», 0–1 */
+  oFillProgress?: number
+  /** Прозрачность плоской буквы «о» при морфе в 3D */
+  oOpacity?: number
+  /** Прозрачность остальных частей логотипа */
+  chromeOpacity?: number
 }
 
 const SWAY_START_MS = 4200
@@ -24,6 +38,10 @@ export function OlalaLogoAnimated({
   className,
   loop = false,
   animate = true,
+  frozen = false,
+  oFillProgress = 0,
+  oOpacity = 1,
+  chromeOpacity = 1,
 }: OlalaLogoAnimatedProps) {
   const [phase, setPhase] = useState(0)
   const [cycleKey, setCycleKey] = useState(0)
@@ -49,7 +67,7 @@ export function OlalaLogoAnimated({
   }, [runAnimation, cycleKey, animate])
 
   useEffect(() => {
-    if (!animate || !loop) return
+    if (!animate || !loop || frozen) return
     const fadeTimer = setTimeout(() => setLogoOpacity(0), FADE_START_MS)
     const cycleTimer = setTimeout(() => {
       setCycleKey((k) => k + 1)
@@ -59,14 +77,19 @@ export function OlalaLogoAnimated({
       clearTimeout(fadeTimer)
       clearTimeout(cycleTimer)
     }
-  }, [loop, cycleKey, animate])
+  }, [loop, cycleKey, animate, frozen])
+
+  useEffect(() => {
+    if (!frozen) return
+    setLogoOpacity(1)
+  }, [frozen])
 
   const assembled = !animate
 
   return (
     <div
       className={className}
-      onClick={animate ? runAnimation : undefined}
+      onClick={animate && !frozen ? runAnimation : undefined}
       role="img"
       aria-label="Olala — нажмите, чтобы повторить анимацию"
       title="Нажмите, чтобы повторить анимацию"
@@ -99,8 +122,8 @@ export function OlalaLogoAnimated({
 
       <div
         style={{
-          opacity: animate && loop ? logoOpacity : 1,
-          transition: animate && loop ? `opacity ${FADE_DURATION_MS}ms ease-out` : undefined,
+          opacity: animate && loop && !frozen ? logoOpacity : 1,
+          transition: animate && loop && !frozen ? `opacity ${FADE_DURATION_MS}ms ease-out` : undefined,
         }}
       >
       <svg
@@ -112,6 +135,7 @@ export function OlalaLogoAnimated({
           height: size,
         }}
       >
+        <g style={{ opacity: chromeOpacity }}>
         {/* First L — tall stem, grows up at phase 1 */}
         <g
           style={{
@@ -184,7 +208,10 @@ export function OlalaLogoAnimated({
           </g>
         </g>
 
+        </g>
+
         {/* O — appears after tulip */}
+        <g style={{ opacity: oOpacity }}>
         <g
           style={{
             opacity: assembled ? 1 : 0,
@@ -194,12 +221,21 @@ export function OlalaLogoAnimated({
                 : "none",
           }}
         >
+          <circle
+            cx={OLALA_O_CX}
+            cy={OLALA_O_CY}
+            r={OLALA_O_INNER_R}
+            fill={PORTAL_PAGE_BG}
+            opacity={oFillProgress}
+          />
           <path
             d="m46.69 163.4c-13.98 0-25.28 11.47-25.28 25.11 0 12.83 10.5 24.78 25.28 24.78 13.87 0 24.96-11.66 24.96-24.92 0-12.91-10.57-24.97-24.96-24.97zm0 43.56c-10.78 0-18.58-8.76-18.58-18.69 0-10.25 8.65-18.24 18.64-18.24 10.47 0 18.07 8.65 18.07 18.41 0 10.15-8.1 18.52-18.13 18.52z"
             fill="#1a1a1a"
           />
         </g>
+        </g>
 
+        <g style={{ opacity: chromeOpacity }}>
         {/* First A — appears after tulip */}
         <g
           style={{
@@ -230,6 +266,7 @@ export function OlalaLogoAnimated({
             d="m179.3 162.8h-0.26c-6.56 0-10.95 3.38-13.4 5.8-1.15 1.11-1.12 2.33 0.13 3.95 1.18 1.61 2.77 1.65 3.95 0.47 3.2-3.21 6.03-4.05 9.27-4.05 7.8 0 12.66 4.75 12.86 12.79v0.61c-3.2-2.7-7.33-4.45-11.98-4.45-10.27 0-17.67 8.75-17.67 18.37 0 9.16 7.26 16.88 16.56 16.88h0.88c5.13 0 9.28-1.85 12.21-4.88v1.68c0 2.22 1.15 3.2 3.17 3.2 2.15 0 3.2-1.02 3.2-3.27v-28.27c-0.1-10.36-7.43-18.83-18.92-18.83zm-0.13 44.48c-7.29 0-10.85-5.95-10.85-10.85 0-6.99 6.1-12.6 12.03-12.6 7.42 0 10.93 5.44 10.93 11.86 0 6.92-5.1 11.59-12.11 11.59z"
             fill="#1a1a1a"
           />
+        </g>
         </g>
       </svg>
       </div>

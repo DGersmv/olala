@@ -115,11 +115,13 @@ function MobilePhotoStrip({
   landscape,
   viewportWidth,
   viewportHeight,
+  frozen,
 }: {
   posts: FeedPost[]
   landscape: boolean
   viewportWidth: number
   viewportHeight: number
+  frozen: boolean
 }) {
   const [startIndex, setStartIndex] = useState(0)
   const [visible, setVisible] = useState(false)
@@ -129,6 +131,11 @@ function MobilePhotoStrip({
 
   useEffect(() => {
     if (batch.length === 0) return
+
+    if (frozen) {
+      setVisible(true)
+      return
+    }
 
     setVisible(false)
     let cancelled = false
@@ -150,7 +157,7 @@ function MobilePhotoStrip({
       window.clearTimeout(fadeOut)
       window.clearTimeout(next)
     }
-  }, [startIndex, batch.length, batchSize, posts.length])
+  }, [frozen, startIndex, batch.length, batchSize, posts.length])
 
   if (batch.length === 0) return null
 
@@ -249,6 +256,7 @@ function ParticlePhotoCard({
   cardHeight,
   viewportWidth,
   viewportHeight,
+  frozen,
   onCycleComplete,
 }: {
   imageUrl: string
@@ -257,13 +265,19 @@ function ParticlePhotoCard({
   cardHeight: number
   viewportWidth: number
   viewportHeight: number
+  frozen: boolean
   onCycleComplete: () => void
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [showPhoto, setShowPhoto] = useState(false)
   const onCycleCompleteRef = useRef(onCycleComplete)
+  const frozenRef = useRef(frozen)
+  const stopAnimationRef = useRef<(() => void) | undefined>(undefined)
+  const holdTimerRef = useRef<number | undefined>(undefined)
+  const fadeTimerRef = useRef<number | undefined>(undefined)
   onCycleCompleteRef.current = onCycleComplete
+  frozenRef.current = frozen
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -271,9 +285,6 @@ function ParticlePhotoCard({
     if (!canvas || !card || cardWidth < 8 || cardHeight < 8) return
 
     let cancelled = false
-    let stopAnimation: (() => void) | undefined
-    let holdTimer: number | undefined
-    let fadeTimer: number | undefined
     let objectUrl: string | undefined
 
     setShowPhoto(false)
@@ -287,6 +298,11 @@ function ParticlePhotoCard({
         requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
       })
       if (cancelled || !canvasRef.current || !cardRef.current) return
+
+      if (frozenRef.current) {
+        setShowPhoto(true)
+        return
+      }
 
       const rect = cardRef.current.getBoundingClientRect()
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -312,8 +328,8 @@ function ParticlePhotoCard({
       }
 
       const runDissolve = () => {
-        if (cancelled || !canvasRef.current) return
-        stopAnimation = runCanvasParticleAnimation(
+        if (cancelled || frozenRef.current || !canvasRef.current) return
+        stopAnimationRef.current = runCanvasParticleAnimation(
           canvasRef.current,
           particles,
           viewportWidth,
@@ -321,12 +337,12 @@ function ParticlePhotoCard({
           PHOTO_DISSOLVE_MS,
           "dissolve",
           () => {
-            if (!cancelled) onCycleCompleteRef.current()
+            if (!cancelled && !frozenRef.current) onCycleCompleteRef.current()
           },
         )
       }
 
-      stopAnimation = runCanvasParticleAnimation(
+      stopAnimationRef.current = runCanvasParticleAnimation(
         canvas,
         particles,
         viewportWidth,
@@ -336,10 +352,11 @@ function ParticlePhotoCard({
         () => {
           if (cancelled) return
           setShowPhoto(true)
-          holdTimer = window.setTimeout(() => {
-            if (cancelled) return
+          if (frozenRef.current) return
+          holdTimerRef.current = window.setTimeout(() => {
+            if (cancelled || frozenRef.current) return
             setShowPhoto(false)
-            fadeTimer = window.setTimeout(runDissolve, PHOTO_FADE_MS)
+            fadeTimerRef.current = window.setTimeout(runDissolve, PHOTO_FADE_MS)
           }, PHOTO_FADE_MS + PHOTO_HOLD_MS)
         },
       )
@@ -349,18 +366,31 @@ function ParticlePhotoCard({
       console.error("[instagram particles]", error)
       if (!cancelled) {
         setShowPhoto(true)
-        holdTimer = window.setTimeout(() => onCycleCompleteRef.current(), PHOTO_HOLD_MS)
+        if (!frozenRef.current) {
+          holdTimerRef.current = window.setTimeout(
+            () => onCycleCompleteRef.current(),
+            PHOTO_HOLD_MS,
+          )
+        }
       }
     })
 
     return () => {
       cancelled = true
-      stopAnimation?.()
-      if (holdTimer) window.clearTimeout(holdTimer)
-      if (fadeTimer) window.clearTimeout(fadeTimer)
+      stopAnimationRef.current?.()
+      if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current)
+      if (fadeTimerRef.current) window.clearTimeout(fadeTimerRef.current)
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
   }, [imageUrl, cardWidth, cardHeight, viewportWidth, viewportHeight])
+
+  useEffect(() => {
+    if (!frozen) return
+    setShowPhoto(true)
+    if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current)
+    if (fadeTimerRef.current) window.clearTimeout(fadeTimerRef.current)
+    stopAnimationRef.current?.()
+  }, [frozen])
 
   return (
     <div className="relative shrink-0 overflow-visible" style={{ width: cardWidth }}>
@@ -379,7 +409,9 @@ function ParticlePhotoCard({
             boxShadow: showPhoto
               ? "0 28px 60px rgba(28, 20, 16, 0.38), 0 10px 22px rgba(28, 20, 16, 0.18)"
               : "0 0 40px rgba(28, 20, 16, 0)",
-            transition: `opacity ${PHOTO_FADE_MS}ms ease-in-out, box-shadow ${PHOTO_FADE_MS}ms ease-in-out`,
+            transition: frozen
+              ? "none"
+              : `opacity ${PHOTO_FADE_MS}ms ease-in-out, box-shadow ${PHOTO_FADE_MS}ms ease-in-out`,
           }}
         />
       </div>
@@ -403,8 +435,10 @@ function ParticlePhotoCard({
           ref={canvasRef}
           className="pointer-events-none fixed inset-0 z-40"
           style={{
-            opacity: showPhoto ? 0 : 1,
-            transition: `opacity ${PHOTO_FADE_MS}ms ease-in-out`,
+            opacity: frozen || showPhoto ? 0 : 1,
+            transition: frozen
+              ? "none"
+              : `opacity ${PHOTO_FADE_MS}ms ease-in-out`,
           }}
           aria-hidden
         />,
@@ -420,6 +454,7 @@ function PhotoCard({
   maxWidth,
   viewportWidth,
   viewportHeight,
+  frozen,
   onCycleComplete,
 }: {
   photo: FeedPost
@@ -427,6 +462,7 @@ function PhotoCard({
   maxWidth: number
   viewportWidth: number
   viewportHeight: number
+  frozen: boolean
   onCycleComplete: () => void
 }) {
   const aspect = useImageAspect(photo.imageUrl)
@@ -454,13 +490,20 @@ function PhotoCard({
         cardHeight={height}
         viewportWidth={viewportWidth}
         viewportHeight={viewportHeight}
+        frozen={frozen}
         onCycleComplete={onCycleComplete}
       />
     </div>
   )
 }
 
-export function InstagramPhotoPanel() {
+export function InstagramPhotoPanel({
+  frozen = false,
+  replayKey = 0,
+}: {
+  frozen?: boolean
+  replayKey?: number
+}) {
   const { phase, instagramPosts, sceneRotationStartAt } = useSiteLoad()
   const [started, setStarted] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -479,14 +522,21 @@ export function InstagramPhotoPanel() {
   }, [])
 
   useEffect(() => {
-    if (phase !== "done" || sceneRotationStartAt === null || posts.length === 0) {
-      return
-    }
+    setStarted(false)
+    setCurrentIndex(0)
+  }, [replayKey])
 
-    const delayMs = Math.max(0, PHOTO_START_DELAY_MS - (performance.now() - sceneRotationStartAt))
+  useEffect(() => {
+    if (phase !== "done" || posts.length === 0) return
+    if (replayKey === 0 && sceneRotationStartAt === null) return
+
+    const delayMs =
+      replayKey > 0
+        ? PHOTO_START_DELAY_MS
+        : Math.max(0, PHOTO_START_DELAY_MS - (performance.now() - (sceneRotationStartAt ?? 0)))
     const timer = window.setTimeout(() => setStarted(true), delayMs)
     return () => window.clearTimeout(timer)
-  }, [phase, posts.length, sceneRotationStartAt])
+  }, [phase, posts.length, sceneRotationStartAt, replayKey])
 
   if (
     phase !== "done" ||
@@ -504,6 +554,7 @@ export function InstagramPhotoPanel() {
         landscape={viewport.width > viewport.height}
         viewportWidth={viewport.width}
         viewportHeight={viewport.height}
+        frozen={frozen}
       />
     )
   }
@@ -521,6 +572,7 @@ export function InstagramPhotoPanel() {
         maxWidth={maxPhotoWidth}
         viewportWidth={viewport.width}
         viewportHeight={viewport.height}
+        frozen={frozen}
         onCycleComplete={() => {
           setCurrentIndex((prev) => (prev + 1) % posts.length)
         }}

@@ -50,9 +50,15 @@ function freezeReveal(splat: LumaSplat, freezeElapsedMs: number) {
 
 type LumaSceneViewerProps = {
   className?: string
+  autoRotate?: boolean
+  replayKey?: number
 }
 
-export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
+export function LumaSceneViewer({
+  className,
+  autoRotate = true,
+  replayKey = 0,
+}: LumaSceneViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { phase, markSceneRotationStart } = useSiteLoad()
   const runtimeTask = useSiteLoadTask("runtime")
@@ -60,9 +66,13 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
   const [sceneVisible, setSceneVisible] = useState(false)
   const phaseRef = useRef(phase)
   const sceneVisibleRef = useRef(false)
+  const autoRotateRef = useRef(autoRotate)
+  const replayKeyRef = useRef(replayKey)
   const markRotationRef = useRef(markSceneRotationStart)
   phaseRef.current = phase
   sceneVisibleRef.current = sceneVisible
+  autoRotateRef.current = autoRotate
+  replayKeyRef.current = replayKey
   markRotationRef.current = markSceneRotationStart
 
   useEffect(() => {
@@ -109,6 +119,13 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
       webglRenderer.domElement.style.height = "100%"
       webglRenderer.domElement.style.display = "block"
       webglRenderer.domElement.style.touchAction = "none"
+      webglRenderer.domElement.addEventListener(
+        "wheel",
+        (event) => {
+          event.preventDefault()
+        },
+        { passive: false },
+      )
       container.appendChild(webglRenderer.domElement)
       renderer = webglRenderer
 
@@ -129,6 +146,7 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
       orbit.autoRotate = true
       orbit.autoRotateSpeed = AUTO_ROTATE_SPEED
       orbit.enablePan = false
+      orbit.enableZoom = false
       orbit.minDistance = 0.8
       orbit.maxDistance = 8
       orbit.target.set(0, 0, 0)
@@ -175,6 +193,7 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
       splat = splatScene
 
       let sceneVisibleSince: number | null = null
+      let lastReplayKey = replayKeyRef.current
 
       const onResize = () => {
         const width = container.clientWidth
@@ -189,6 +208,17 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
 
       webglRenderer.setAnimationLoop(() => {
         const isLive = phaseRef.current === "done" && sceneVisibleRef.current
+        const wantAutoRotate = autoRotateRef.current
+
+        orbit.enableZoom = false
+        orbit.enableRotate = true
+        orbit.enabled = true
+
+        if (lastReplayKey !== replayKeyRef.current) {
+          lastReplayKey = replayKeyRef.current
+          sceneVisibleSince = isLive ? performance.now() : null
+          orbit.autoRotate = wantAutoRotate
+        }
 
         if (isLive) {
           if (sceneVisibleSince === null) {
@@ -196,11 +226,18 @@ export function LumaSceneViewer({ className }: LumaSceneViewerProps) {
             markRotationRef.current()
           }
 
-          if (
+          if (!wantAutoRotate) {
+            orbit.autoRotate = false
+          } else if (
             orbit.autoRotate &&
             performance.now() - sceneVisibleSince >= AUTO_ROTATE_STOP_MS
           ) {
             orbit.autoRotate = false
+          } else if (
+            wantAutoRotate &&
+            performance.now() - sceneVisibleSince < AUTO_ROTATE_STOP_MS
+          ) {
+            orbit.autoRotate = true
           }
 
           freezeReveal(splatScene, freezeElapsedMs)
